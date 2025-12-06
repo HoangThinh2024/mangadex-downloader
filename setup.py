@@ -101,6 +101,7 @@ setup(
         "console_scripts": [
             "mangadex-downloader=mangadex_downloader.__main__:main",
             "mangadex-dl=mangadex_downloader.__main__:main",
+            "mangadex-dl-gui=mangadex_downloader.gui.__main__:main",
         ]
     },
     classifiers=[

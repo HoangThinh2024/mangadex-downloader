@@ -171,7 +171,10 @@ python3 -m pip install mangadex-downloader[optional]
 **Running the GUI:**
 
 ```shell
-# Run directly from Python module
+# After installing with [optional], you can run:
+mangadex-dl-gui
+
+# Or run directly from Python module
 python3 -m mangadex_downloader.gui
 
 # Or use the provided launcher script

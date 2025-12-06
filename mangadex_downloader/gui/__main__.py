@@ -24,14 +24,26 @@
 
 import sys
 
-try:
-    import customtkinter
-except ImportError:
-    print("Error: customtkinter is not installed.")
-    print("Please install it with: pip install mangadex-downloader[optional]")
-    sys.exit(1)
 
-from .app import main
+def main():
+    """Main entry point for GUI"""
+    try:
+        import customtkinter
+    except ImportError:
+        print("=" * 60)
+        print("ERROR: customtkinter is not installed")
+        print("=" * 60)
+        print("\nThe GUI requires customtkinter to be installed.")
+        print("\nTo install it, run one of the following commands:\n")
+        print("  pip install mangadex-downloader[optional]")
+        print("  pip install customtkinter\n")
+        print("For more information, see GUI_USAGE.md")
+        print("=" * 60)
+        sys.exit(1)
+    
+    from .app import main as app_main
+    app_main()
+
 
 if __name__ == "__main__":
     main()
