@@ -69,7 +69,8 @@ app.mainloop()
 The Search tab allows you to search for manga on MangaDex and browse results with cover images.
 
 **Features:**
-- **Search Input**: Enter manga title or keywords to search
+- **Title Search Input**: Enter manga title or keywords to search
+- **Author Search Input**: Enter author name to filter results by author
 - **Search Results**: Browse manga with:
   - Cover images (automatically loaded)
   - Title and alternative titles
@@ -79,11 +80,14 @@ The Search tab allows you to search for manga on MangaDex and browse results wit
 - **Download Button**: Click on any search result to load it into the Download tab
 
 **Usage:**
-1. Enter your search query (e.g., "One Piece", "Naruto")
-2. Click the Search button
-3. Browse through results with cover images
-4. Click "Download This Manga" on any result to prepare it for download
-5. Switch to Download tab to configure and start the download
+1. Enter your search query in the title field (e.g., "One Piece", "Naruto")
+2. Optionally, enter an author name (e.g., "Oda", "Kishimoto") to filter results
+3. Click the Search button
+4. Browse through results with cover images
+5. Click "Download This Manga" on any result to prepare it for download
+6. Switch to Download tab to configure and start the download
+
+**Note:** You can search by title only, author only, or both. If searching by author only, leave the title field empty.
 
 ### Download Tab
 

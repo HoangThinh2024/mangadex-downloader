@@ -732,34 +732,23 @@ class MangaDexDownloaderGUI(ctk.CTk):
             # Create iterator for manga search
             # If only author is provided, search with empty title to get more results
             search_title = title_query if title_query else ""
-            iterator = IteratorManga(search_title)
+            
+            # Prepare filters for author search
+            filters = {}
+            if author_query:
+                filters["author_name"] = author_query
+            
+            iterator = IteratorManga(search_title, **filters)
             
             results = []
             count = 0
-            max_results = 50  # Fetch more to ensure we have enough after filtering
+            max_results = 20  # Limit displayed results
             
             # Fetch manga results
             for manga in iterator:
-                # Filter by author if specified
-                if author_query:
-                    # Check if any author name contains the search query (case-insensitive)
-                    author_match = False
-                    if manga.authors:
-                        for author in manga.authors:
-                            if author_query.lower() in author.lower():
-                                author_match = True
-                                break
-                    
-                    # Skip if author doesn't match
-                    if not author_match:
-                        continue
-                
                 results.append(manga)
                 count += 1
-                if len(results) >= 20:  # Limit displayed results
-                    break
-                    
-                if count >= max_results:  # Limit API calls
+                if count >= max_results:
                     break
             
             # Update UI with results

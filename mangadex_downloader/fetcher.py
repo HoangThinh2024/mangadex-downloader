@@ -90,6 +90,25 @@ def get_author(author_id):
     return r.json()
 
 
+def search_author(name, limit=10):
+    """Search for authors by name
+    
+    Args:
+        name (str): Author name to search for
+        limit (int): Maximum number of results to return (default: 10)
+    
+    Returns:
+        list: List of author data dictionaries
+    """
+    url = "{0}/author".format(base_url)
+    params = {
+        "name": name,
+        "limit": limit
+    }
+    r = Net.mangadex.get(url, params=params)
+    return r.json().get("data", [])
+
+
 @lru_cache(maxsize=1048)
 def get_user(user_id):
     url = "{0}/user/{1}".format(base_url, user_id)
