@@ -62,6 +62,27 @@ python3 run_gui.py
 
 ## Các Tính Năng GUI
 
+### Tab Search (Tìm kiếm)
+
+Tab Search cho phép bạn tìm kiếm manga trên MangaDex và duyệt kết quả với hình ảnh bìa.
+
+**Tính năng:**
+- **Search Input** (Nhập tìm kiếm): Nhập tên manga hoặc từ khóa để tìm kiếm
+- **Search Results** (Kết quả tìm kiếm): Duyệt manga với:
+  - Hình ảnh bìa (tự động tải)
+  - Tiêu đề và tiêu đề thay thế
+  - Tác giả và họa sĩ
+  - Trạng thái và thể loại
+  - Xem trước mô tả
+- **Download Button** (Nút tải xuống): Nhấp vào bất kỳ kết quả tìm kiếm nào để tải nó vào tab Download
+
+**Cách sử dụng:**
+1. Nhập truy vấn tìm kiếm của bạn (ví dụ: "One Piece", "Naruto")
+2. Nhấp vào nút Search
+3. Duyệt qua kết quả với hình ảnh bìa
+4. Nhấp "Download This Manga" trên bất kỳ kết quả nào để chuẩn bị tải xuống
+5. Chuyển sang tab Download để cấu hình và bắt đầu tải xuống
+
 ### Tab Download (Tải xuống)
 
 Tab chính để tải manga từ MangaDex.
@@ -214,7 +235,8 @@ Tất cả các tính năng CLI đều có sẵn trong GUI. GUI gọi cùng mộ
 
 **Ưu điểm GUI:**
 - Giao diện thân thiện với người dùng
-- Phản hồi trực quan
+- Phản hồi trực quan với hình ảnh bìa
+- Tìm kiếm manga với xem trước trực quan
 - Không cần nhớ lệnh
 - Quản lý cấu hình dễ dàng
 
@@ -241,8 +263,9 @@ Nếu bạn tìm thấy lỗi hoặc muốn đề xuất cải tiến GUI:
 
 ![GUI Screenshot](https://github.com/user-attachments/assets/41c25f5d-dce2-4358-9984-fcb06cc59caa)
 
-Giao diện GUI hiện đại với 4 tab chính:
-1. **Download**: Tải manga với nhiều tùy chọn
-2. **Authentication**: Đăng nhập MangaDex
-3. **Settings**: Cấu hình ứng dụng
-4. **Logs**: Xem tiến trình và lỗi
+Giao diện GUI hiện đại với 5 tab chính:
+1. **Search**: Tìm kiếm manga với hiển thị hình ảnh bìa
+2. **Download**: Tải manga với nhiều tùy chọn
+3. **Authentication**: Đăng nhập MangaDex
+4. **Settings**: Cấu hình ứng dụng
+5. **Logs**: Xem tiến trình và lỗi

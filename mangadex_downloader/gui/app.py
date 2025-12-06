@@ -24,16 +24,23 @@ import customtkinter as ctk
 import threading
 import logging
 import queue
-from pathlib import Path
 from tkinter import filedialog, messagebox
-import sys
+from io import BytesIO
 
 from ..language import Language
 from ..format import formats
 from ..cover import valid_cover_types
-from ..config import config
 from ..cli.utils import setup_logging
 from .. import __version__
+from ..iterator import IteratorManga
+from ..utils import get_cover_art_url
+from ..network import Net
+
+try:
+    from PIL import Image, ImageTk
+    PIL_AVAILABLE = True
+except ImportError:
+    PIL_AVAILABLE = False
 
 # Configure customtkinter appearance
 ctk.set_appearance_mode("System")
@@ -86,16 +93,53 @@ class MangaDexDownloaderGUI(ctk.CTk):
         self.tabview.pack(padx=10, pady=10, fill="both", expand=True)
         
         # Create tabs
+        self.tab_search = self.tabview.add("Search")
         self.tab_download = self.tabview.add("Download")
         self.tab_auth = self.tabview.add("Authentication")
         self.tab_settings = self.tabview.add("Settings")
         self.tab_logs = self.tabview.add("Logs")
         
         # Setup each tab
+        self.setup_search_tab()
         self.setup_download_tab()
         self.setup_auth_tab()
         self.setup_settings_tab()
         self.setup_logs_tab()
+        
+    def setup_search_tab(self):
+        """Setup the search tab"""
+        
+        # Search Input Frame
+        search_frame = ctk.CTkFrame(self.tab_search)
+        search_frame.pack(padx=10, pady=10, fill="x")
+        
+        ctk.CTkLabel(search_frame, text="Search Manga:", font=("Arial", 14, "bold")).pack(anchor="w", padx=10, pady=(10, 5))
+        
+        search_input_frame = ctk.CTkFrame(search_frame)
+        search_input_frame.pack(padx=10, pady=(0, 10), fill="x")
+        
+        self.search_entry = ctk.CTkEntry(search_input_frame, placeholder_text="Enter manga title to search")
+        self.search_entry.pack(side="left", padx=(0, 5), pady=5, fill="x", expand=True)
+        
+        self.search_button = ctk.CTkButton(search_input_frame, text="Search", width=100, command=self.start_search)
+        self.search_button.pack(side="left", padx=5, pady=5)
+        
+        # Search Results Frame
+        results_frame = ctk.CTkFrame(self.tab_search)
+        results_frame.pack(padx=10, pady=10, fill="both", expand=True)
+        
+        ctk.CTkLabel(results_frame, text="Search Results:", font=("Arial", 12, "bold")).pack(anchor="w", padx=10, pady=(10, 5))
+        
+        # Scrollable frame for results
+        self.search_results_frame = ctk.CTkScrollableFrame(results_frame, width=940, height=500)
+        self.search_results_frame.pack(padx=10, pady=10, fill="both", expand=True)
+        
+        # Status label
+        self.search_status_label = ctk.CTkLabel(self.tab_search, text="Ready to search")
+        self.search_status_label.pack(padx=10, pady=5)
+        
+        # Variable to store search results
+        self.search_results = []
         
     def setup_download_tab(self):
         """Setup the download tab"""
@@ -459,7 +503,7 @@ class MangaDexDownloaderGUI(ctk.CTk):
                 self.after(0, lambda: self.download_error(error_msg))
                 
         except Exception as e:
-            self.after(0, lambda: self.download_error(str(e)))
+            self.after(0, lambda err=str(e): self.download_error(err))
             
     def build_cli_args(self, url):
         """Build CLI arguments from GUI settings"""
@@ -600,7 +644,7 @@ class MangaDexDownloaderGUI(ctk.CTk):
                     error_msg = err_msg if err_msg else "Login failed"
                     self.after(0, lambda msg=error_msg: self.login_error(msg))
             except Exception as e:
-                self.after(0, lambda: self.login_error(str(e)))
+                self.after(0, lambda err=str(e): self.login_error(err))
         
         threading.Thread(target=login_worker, daemon=True).start()
         self.auth_status_label.configure(text="Logging in...")
@@ -626,7 +670,7 @@ class MangaDexDownloaderGUI(ctk.CTk):
                     Net.mangadex.logout()
                 self.after(0, lambda: self.logout_complete())
             except Exception as e:
-                self.after(0, lambda: self.logout_error(str(e)))
+                self.after(0, lambda err=str(e): self.logout_error(err))
 
         threading.Thread(target=logout_worker, daemon=True).start()
         self.auth_status_label.configure(text="Logging out...")
@@ -638,6 +682,213 @@ class MangaDexDownloaderGUI(ctk.CTk):
     def logout_error(self, error_msg):
         self.auth_status_label.configure(text="Logout failed")
         messagebox.showerror("Error", f"Logout failed: {error_msg}")
+    
+    def start_search(self):
+        """Start the manga search"""
+        
+        query = self.search_entry.get().strip()
+        if not query:
+            messagebox.showerror("Error", "Please enter a search query!")
+            return
+        
+        # Clear previous results
+        for widget in self.search_results_frame.winfo_children():
+            widget.destroy()
+        
+        self.search_results = []
+        
+        # Disable search button
+        self.search_button.configure(state="disabled", text="Searching...")
+        self.search_status_label.configure(text=f"Searching for '{query}'...")
+        
+        # Start search in separate thread
+        search_thread = threading.Thread(target=self.search_worker, args=(query,), daemon=True)
+        search_thread.start()
+    
+    def search_worker(self, query):
+        """Worker thread for searching manga"""
+        
+        try:
+            # Create iterator for manga search
+            iterator = IteratorManga(query)
+            
+            results = []
+            count = 0
+            max_results = 20  # Limit results to prevent overwhelming the UI
+            
+            # Fetch manga results
+            for manga in iterator:
+                results.append(manga)
+                count += 1
+                if count >= max_results:
+                    break
+            
+            # Update UI with results
+            self.after(0, lambda: self.display_search_results(results))
+            
+        except Exception as e:
+            self.after(0, lambda err=str(e): self.search_error(err))
+    
+    def display_search_results(self, results):
+        """Display search results in the GUI"""
+        
+        if not results:
+            self.search_status_label.configure(text="No results found")
+            self.search_button.configure(state="normal", text="Search")
+            messagebox.showinfo("No Results", "No manga found matching your search query.")
+            return
+        
+        self.search_results = results
+        self.search_status_label.configure(text=f"Found {len(results)} results")
+        
+        # Display each result
+        for idx, manga in enumerate(results):
+            self.create_manga_result_widget(manga, idx)
+        
+        self.search_button.configure(state="normal", text="Search")
+    
+    def create_manga_result_widget(self, manga, idx):
+        """Create a widget to display a single manga result"""
+        
+        # Container for each manga result
+        result_frame = ctk.CTkFrame(self.search_results_frame)
+        result_frame.pack(padx=5, pady=5, fill="x")
+        
+        # Left side: Cover image
+        cover_frame = ctk.CTkFrame(result_frame, width=150, height=200)
+        cover_frame.pack(side="left", padx=10, pady=10)
+        cover_frame.pack_propagate(False)
+        
+        if PIL_AVAILABLE and manga.cover:
+            # Load cover image in a thread
+            threading.Thread(
+                target=self.load_cover_image, 
+                args=(manga.id, manga.cover, cover_frame), 
+                daemon=True
+            ).start()
+        else:
+            # Placeholder if PIL is not available
+            no_image_label = ctk.CTkLabel(cover_frame, text="No Image\nAvailable")
+            no_image_label.pack(expand=True)
+        
+        # Right side: Manga details
+        details_frame = ctk.CTkFrame(result_frame)
+        details_frame.pack(side="left", padx=10, pady=10, fill="both", expand=True)
+        
+        # Title
+        title_label = ctk.CTkLabel(
+            details_frame, 
+            text=manga.title, 
+            font=("Arial", 14, "bold"),
+            wraplength=600,
+            justify="left"
+        )
+        title_label.pack(anchor="w", padx=5, pady=(5, 2))
+        
+        # Authors
+        if manga.authors:
+            authors_text = "Authors: " + ", ".join(manga.authors)
+            authors_label = ctk.CTkLabel(details_frame, text=authors_text, wraplength=600, justify="left")
+            authors_label.pack(anchor="w", padx=5, pady=2)
+        
+        # Status and Year
+        status_text = f"Status: {manga.status}"
+        if hasattr(manga, 'year') and manga.year:
+            status_text += f" | Year: {manga.year}"
+        status_label = ctk.CTkLabel(details_frame, text=status_text)
+        status_label.pack(anchor="w", padx=5, pady=2)
+        
+        # Genres
+        if manga.genres:
+            genres_text = "Genres: " + ", ".join(manga.genres[:5])  # Limit to 5 genres
+            if len(manga.genres) > 5:
+                genres_text += "..."
+            genres_label = ctk.CTkLabel(details_frame, text=genres_text, wraplength=600, justify="left")
+            genres_label.pack(anchor="w", padx=5, pady=2)
+        
+        # Description (truncated)
+        if manga.description:
+            desc_text = manga.description[:200] + "..." if len(manga.description) > 200 else manga.description
+            desc_label = ctk.CTkLabel(
+                details_frame, 
+                text=f"Description: {desc_text}",
+                wraplength=600,
+                justify="left"
+            )
+            desc_label.pack(anchor="w", padx=5, pady=2)
+        
+        # Download button
+        download_btn = ctk.CTkButton(
+            details_frame,
+            text="Download This Manga",
+            command=lambda m=manga: self.download_from_search(m)
+        )
+        download_btn.pack(anchor="w", padx=5, pady=10)
+    
+    def load_cover_image(self, manga_id, cover, cover_frame):
+        """Load and display manga cover image"""
+        
+        try:
+            # Get cover URL
+            cover_url = get_cover_art_url(manga_id, cover, "256px")
+            
+            if not cover_url:
+                return
+            
+            # Download image
+            response = Net.mangadex.get(cover_url, stream=True)
+            response.raise_for_status()
+            
+            # Load image with PIL
+            image_data = BytesIO(response.content)
+            pil_image = Image.open(image_data)
+            
+            # Resize to fit the frame
+            pil_image.thumbnail((150, 200), Image.Resampling.LANCZOS)
+            
+            # Convert to PhotoImage
+            photo = ImageTk.PhotoImage(pil_image)
+            
+            # Display in GUI (must be done in main thread)
+            def display():
+                # Clear existing widgets
+                for widget in cover_frame.winfo_children():
+                    widget.destroy()
+                
+                # Create label with image
+                img_label = ctk.CTkLabel(cover_frame, image=photo, text="")
+                img_label.image = photo  # Keep a reference
+                img_label.pack(expand=True)
+            
+            self.after(0, display)
+            
+        except Exception as e:
+            log.debug(f"Failed to load cover image: {e}")
+            # If loading fails, we just don't show an image
+    
+    def download_from_search(self, manga):
+        """Initiate download from a search result"""
+        
+        # Switch to download tab
+        self.tabview.set("Download")
+        
+        # Fill in the URL field with manga URL
+        manga_url = f"https://mangadex.org/title/{manga.id}"
+        self.url_entry.delete(0, "end")
+        self.url_entry.insert(0, manga_url)
+        
+        # Auto-start download or just show a message
+        messagebox.showinfo(
+            "Ready to Download", 
+            f"Manga '{manga.title}' URL has been loaded. Click Download to start."
+        )
+    
+    def search_error(self, error_msg):
+        """Called when search fails"""
+        
+        self.search_status_label.configure(text="Search failed")
+        self.search_button.configure(state="normal", text="Search")
+        messagebox.showerror("Error", f"Search failed: {error_msg}")
 
 def main():
     """Main entry point for GUI"""
