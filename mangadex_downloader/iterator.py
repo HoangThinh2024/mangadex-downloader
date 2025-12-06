@@ -27,7 +27,7 @@ from .mdlist import MangaDexList
 from .errors import HTTPException, MangaDexException, NotLoggedIn
 from .network import Net, base_url
 from .manga import Manga
-from .fetcher import get_list, get_legacy_id
+from .fetcher import get_list, get_legacy_id, search_author
 from .user import User
 from .filters import Filter
 from .utils import check_blacklisted_tags_manga
@@ -102,6 +102,18 @@ class IteratorManga(MangaIterator):
 
         self.limit = 100
         self.title = title
+        
+        # Handle author name search
+        author_name = filters.pop("author_name", None)
+        if author_name:
+            # Search for authors by name and get their UUIDs
+            author_results = search_author(author_name, limit=5)
+            if author_results:
+                # Use the authorOrArtist parameter which accepts UUID
+                author_ids = [author["id"] for author in author_results]
+                # Use the first matching author
+                if author_ids:
+                    filters["author_or_artist"] = author_ids[0]
 
         f = Filter()
         self._param_init = f.get_request_params(**filters)
