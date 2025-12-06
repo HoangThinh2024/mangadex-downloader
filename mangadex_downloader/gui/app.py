@@ -37,7 +37,7 @@ from ..utils import get_cover_art_url
 from ..network import Net
 
 try:
-    from PIL import Image, ImageTk
+    from PIL import Image
     PIL_AVAILABLE = True
 except ImportError:
     PIL_AVAILABLE = False
@@ -115,13 +115,23 @@ class MangaDexDownloaderGUI(ctk.CTk):
         
         ctk.CTkLabel(search_frame, text="Search Manga:", font=("Arial", 14, "bold")).pack(anchor="w", padx=10, pady=(10, 5))
         
-        search_input_frame = ctk.CTkFrame(search_frame)
-        search_input_frame.pack(padx=10, pady=(0, 10), fill="x")
+        # Title search
+        title_search_frame = ctk.CTkFrame(search_frame)
+        title_search_frame.pack(padx=10, pady=(0, 5), fill="x")
         
-        self.search_entry = ctk.CTkEntry(search_input_frame, placeholder_text="Enter manga title to search")
+        ctk.CTkLabel(title_search_frame, text="Title:", width=60).pack(side="left", padx=(0, 5), pady=5)
+        self.search_entry = ctk.CTkEntry(title_search_frame, placeholder_text="Enter manga title to search")
         self.search_entry.pack(side="left", padx=(0, 5), pady=5, fill="x", expand=True)
         
-        self.search_button = ctk.CTkButton(search_input_frame, text="Search", width=100, command=self.start_search)
+        # Author search
+        author_search_frame = ctk.CTkFrame(search_frame)
+        author_search_frame.pack(padx=10, pady=(0, 10), fill="x")
+        
+        ctk.CTkLabel(author_search_frame, text="Author:", width=60).pack(side="left", padx=(0, 5), pady=5)
+        self.author_entry = ctk.CTkEntry(author_search_frame, placeholder_text="Enter author name (optional)")
+        self.author_entry.pack(side="left", padx=(0, 5), pady=5, fill="x", expand=True)
+        
+        self.search_button = ctk.CTkButton(author_search_frame, text="Search", width=100, command=self.start_search)
         self.search_button.pack(side="left", padx=5, pady=5)
         
         # Search Results Frame
@@ -686,9 +696,11 @@ class MangaDexDownloaderGUI(ctk.CTk):
     def start_search(self):
         """Start the manga search"""
         
-        query = self.search_entry.get().strip()
-        if not query:
-            messagebox.showerror("Error", "Please enter a search query!")
+        title_query = self.search_entry.get().strip()
+        author_query = self.author_entry.get().strip()
+        
+        if not title_query and not author_query:
+            messagebox.showerror("Error", "Please enter at least a title or author name to search!")
             return
         
         # Clear previous results
@@ -699,28 +711,55 @@ class MangaDexDownloaderGUI(ctk.CTk):
         
         # Disable search button
         self.search_button.configure(state="disabled", text="Searching...")
-        self.search_status_label.configure(text=f"Searching for '{query}'...")
+        
+        # Create search status message
+        search_terms = []
+        if title_query:
+            search_terms.append(f"title: '{title_query}'")
+        if author_query:
+            search_terms.append(f"author: '{author_query}'")
+        status_msg = f"Searching for {' and '.join(search_terms)}..."
+        self.search_status_label.configure(text=status_msg)
         
         # Start search in separate thread
-        search_thread = threading.Thread(target=self.search_worker, args=(query,), daemon=True)
+        search_thread = threading.Thread(target=self.search_worker, args=(title_query, author_query), daemon=True)
         search_thread.start()
     
-    def search_worker(self, query):
+    def search_worker(self, title_query, author_query):
         """Worker thread for searching manga"""
         
         try:
             # Create iterator for manga search
-            iterator = IteratorManga(query)
+            # If only author is provided, search with empty title to get more results
+            search_title = title_query if title_query else ""
+            iterator = IteratorManga(search_title)
             
             results = []
             count = 0
-            max_results = 20  # Limit results to prevent overwhelming the UI
+            max_results = 50  # Fetch more to ensure we have enough after filtering
             
             # Fetch manga results
             for manga in iterator:
+                # Filter by author if specified
+                if author_query:
+                    # Check if any author name contains the search query (case-insensitive)
+                    author_match = False
+                    if manga.authors:
+                        for author in manga.authors:
+                            if author_query.lower() in author.lower():
+                                author_match = True
+                                break
+                    
+                    # Skip if author doesn't match
+                    if not author_match:
+                        continue
+                
                 results.append(manga)
                 count += 1
-                if count >= max_results:
+                if len(results) >= 20:  # Limit displayed results
+                    break
+                    
+                if count >= max_results:  # Limit API calls
                     break
             
             # Update UI with results
@@ -846,8 +885,8 @@ class MangaDexDownloaderGUI(ctk.CTk):
             # Resize to fit the frame
             pil_image.thumbnail((150, 200), Image.Resampling.LANCZOS)
             
-            # Convert to PhotoImage
-            photo = ImageTk.PhotoImage(pil_image)
+            # Convert to CTkImage for proper HighDPI support
+            ctk_image = ctk.CTkImage(light_image=pil_image, dark_image=pil_image, size=(150, 200))
             
             # Display in GUI (must be done in main thread)
             def display():
@@ -855,9 +894,9 @@ class MangaDexDownloaderGUI(ctk.CTk):
                 for widget in cover_frame.winfo_children():
                     widget.destroy()
                 
-                # Create label with image
-                img_label = ctk.CTkLabel(cover_frame, image=photo, text="")
-                img_label.image = photo  # Keep a reference
+                # Create label with CTkImage
+                img_label = ctk.CTkLabel(cover_frame, image=ctk_image, text="")
+                img_label.image = ctk_image  # Keep a reference
                 img_label.pack(expand=True)
             
             self.after(0, display)

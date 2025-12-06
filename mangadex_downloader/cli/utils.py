@@ -23,6 +23,7 @@
 import logging
 import signal
 import sys
+import threading
 
 from .. import __version__, __repository__, __url_repository__
 from ..update import architecture, executable
@@ -93,6 +94,11 @@ def _keyboard_interrupt_handler(*args):
 
 
 def register_keyboardinterrupt_handler():
+    # Signal handlers can only be registered in the main thread
+    # Skip registration if called from a non-main thread (e.g., from GUI)
+    if threading.current_thread() is not threading.main_thread():
+        return
+    
     # CTRL+C is pressed
     signal.signal(signal.SIGINT, _keyboard_interrupt_handler)
 
