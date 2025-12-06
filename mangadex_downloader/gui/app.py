@@ -619,11 +619,25 @@ class MangaDexDownloaderGUI(ctk.CTk):
         
     def logout(self):
         """Handle logout"""
-        
-        # Implement logout logic here
+        def logout_worker():
+            try:
+                from ..network import Net
+                if Net.mangadex.check_login():
+                    Net.mangadex.logout()
+                self.after(0, lambda: self.logout_complete())
+            except Exception as e:
+                self.after(0, lambda: self.logout_error(str(e)))
+
+        threading.Thread(target=logout_worker, daemon=True).start()
+        self.auth_status_label.configure(text="Logging out...")
+
+    def logout_complete(self):
         self.auth_status_label.configure(text="Not logged in")
         messagebox.showinfo("Success", "Logged out successfully!")
 
+    def logout_error(self, error_msg):
+        self.auth_status_label.configure(text="Logout failed")
+        messagebox.showerror("Error", f"Logout failed: {error_msg}")
 
 def main():
     """Main entry point for GUI"""
