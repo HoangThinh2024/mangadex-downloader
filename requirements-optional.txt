@@ -2,3 +2,4 @@ py7zr==0.22.0
 orjson==3.10.15
 lxml==5.3.0
 Authlib
+customtkinter>=5.2.2
