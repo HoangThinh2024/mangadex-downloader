@@ -67,7 +67,8 @@ python3 run_gui.py
 Tab Search cho phép bạn tìm kiếm manga trên MangaDex và duyệt kết quả với hình ảnh bìa.
 
 **Tính năng:**
-- **Search Input** (Nhập tìm kiếm): Nhập tên manga hoặc từ khóa để tìm kiếm
+- **Title Search Input** (Nhập tìm kiếm theo tên): Nhập tên manga hoặc từ khóa để tìm kiếm
+- **Author Search Input** (Nhập tìm kiếm theo tác giả): Nhập tên tác giả để lọc kết quả theo tác giả
 - **Search Results** (Kết quả tìm kiếm): Duyệt manga với:
   - Hình ảnh bìa (tự động tải)
   - Tiêu đề và tiêu đề thay thế
@@ -77,11 +78,14 @@ Tab Search cho phép bạn tìm kiếm manga trên MangaDex và duyệt kết qu
 - **Download Button** (Nút tải xuống): Nhấp vào bất kỳ kết quả tìm kiếm nào để tải nó vào tab Download
 
 **Cách sử dụng:**
-1. Nhập truy vấn tìm kiếm của bạn (ví dụ: "One Piece", "Naruto")
-2. Nhấp vào nút Search
-3. Duyệt qua kết quả với hình ảnh bìa
-4. Nhấp "Download This Manga" trên bất kỳ kết quả nào để chuẩn bị tải xuống
-5. Chuyển sang tab Download để cấu hình và bắt đầu tải xuống
+1. Nhập truy vấn tìm kiếm của bạn vào trường tên (ví dụ: "One Piece", "Naruto")
+2. Tùy chọn, nhập tên tác giả (ví dụ: "Oda", "Kishimoto") để lọc kết quả
+3. Nhấp vào nút Search
+4. Duyệt qua kết quả với hình ảnh bìa
+5. Nhấp "Download This Manga" trên bất kỳ kết quả nào để chuẩn bị tải xuống
+6. Chuyển sang tab Download để cấu hình và bắt đầu tải xuống
+
+**Lưu ý:** Bạn có thể tìm kiếm chỉ bằng tên, chỉ bằng tác giả, hoặc cả hai. Nếu tìm kiếm chỉ bằng tác giả, để trống trường tên.
 
 ### Tab Download (Tải xuống)
 
