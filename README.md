@@ -154,6 +154,8 @@ python setup.py install # or "pip install ."
 
 MangaDex Downloader now includes a modern GUI built with customtkinter! The GUI provides an easy-to-use interface with all CLI features accessible through a graphical interface.
 
+**📖 [Read full GUI documentation](GUI_USAGE.md)** | **🇻🇳 [Hướng dẫn tiếng Việt](GUI_HUONG_DAN.md)**
+
 ![GUI Screenshot](https://github.com/user-attachments/assets/41c25f5d-dce2-4358-9984-fcb06cc59caa)
 
 **Installation:**
