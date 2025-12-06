@@ -598,7 +598,7 @@ class MangaDexDownloaderGUI(ctk.CTk):
                     self.after(0, lambda: self.login_complete())
                 else:
                     error_msg = err_msg if err_msg else "Login failed"
-                    self.after(0, lambda: self.login_error(error_msg))
+                    self.after(0, lambda msg=error_msg: self.login_error(msg))
             except Exception as e:
                 self.after(0, lambda: self.login_error(str(e)))
         
