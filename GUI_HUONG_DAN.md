@@ -263,8 +263,9 @@ Nếu bạn tìm thấy lỗi hoặc muốn đề xuất cải tiến GUI:
 
 ![GUI Screenshot](https://github.com/user-attachments/assets/41c25f5d-dce2-4358-9984-fcb06cc59caa)
 
-Giao diện GUI hiện đại với 4 tab chính:
-1. **Download**: Tải manga với nhiều tùy chọn
-2. **Authentication**: Đăng nhập MangaDex
-3. **Settings**: Cấu hình ứng dụng
-4. **Logs**: Xem tiến trình và lỗi
+Giao diện GUI hiện đại với 5 tab chính:
+1. **Search**: Tìm kiếm manga với hiển thị hình ảnh bìa
+2. **Download**: Tải manga với nhiều tùy chọn
+3. **Authentication**: Đăng nhập MangaDex
+4. **Settings**: Cấu hình ứng dụng
+5. **Logs**: Xem tiến trình và lỗi

@@ -24,15 +24,12 @@ import customtkinter as ctk
 import threading
 import logging
 import queue
-from pathlib import Path
 from tkinter import filedialog, messagebox
-import sys
 from io import BytesIO
 
 from ..language import Language
 from ..format import formats
 from ..cover import valid_cover_types
-from ..config import config
 from ..cli.utils import setup_logging
 from .. import __version__
 from ..iterator import IteratorManga
@@ -506,7 +503,7 @@ class MangaDexDownloaderGUI(ctk.CTk):
                 self.after(0, lambda: self.download_error(error_msg))
                 
         except Exception as e:
-            self.after(0, lambda: self.download_error(str(e)))
+            self.after(0, lambda err=str(e): self.download_error(err))
             
     def build_cli_args(self, url):
         """Build CLI arguments from GUI settings"""
@@ -647,7 +644,7 @@ class MangaDexDownloaderGUI(ctk.CTk):
                     error_msg = err_msg if err_msg else "Login failed"
                     self.after(0, lambda msg=error_msg: self.login_error(msg))
             except Exception as e:
-                self.after(0, lambda: self.login_error(str(e)))
+                self.after(0, lambda err=str(e): self.login_error(err))
         
         threading.Thread(target=login_worker, daemon=True).start()
         self.auth_status_label.configure(text="Logging in...")
@@ -673,7 +670,7 @@ class MangaDexDownloaderGUI(ctk.CTk):
                     Net.mangadex.logout()
                 self.after(0, lambda: self.logout_complete())
             except Exception as e:
-                self.after(0, lambda: self.logout_error(str(e)))
+                self.after(0, lambda err=str(e): self.logout_error(err))
 
         threading.Thread(target=logout_worker, daemon=True).start()
         self.auth_status_label.configure(text="Logging out...")
@@ -730,7 +727,7 @@ class MangaDexDownloaderGUI(ctk.CTk):
             self.after(0, lambda: self.display_search_results(results))
             
         except Exception as e:
-            self.after(0, lambda: self.search_error(str(e)))
+            self.after(0, lambda err=str(e): self.search_error(err))
     
     def display_search_results(self, results):
         """Display search results in the GUI"""
