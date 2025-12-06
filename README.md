@@ -8,7 +8,7 @@
 [![Indonesian](https://img.shields.io/badge/Language-Indonesian-blue.svg)](https://github.com/mansuf/mangadex-downloader/blob/main/README.id.md)
 [![Turkish](https://img.shields.io/badge/Language-Turkish-blue.svg)](https://github.com/mansuf/mangadex-downloader/blob/main/README.tr.md)
 
-A command-line tool to download manga from [MangaDex](https://mangadex.org/), written in [Python](https://www.python.org/).
+A command-line tool and GUI application to download manga from [MangaDex](https://mangadex.org/), written in [Python](https://www.python.org/).
 
 ## Table of Contents
 
@@ -20,6 +20,7 @@ A command-line tool to download manga from [MangaDex](https://mangadex.org/), wr
     - [Docker](#installation-docker)
     - [Development version](#installation-development-version)
 - [Usage](#usage)
+    - [GUI (Graphical User Interface)](#usage-gui)
     - [PyPI version](#usage-pypi-version)
     - [Bundled executable version](#usage-bundled-executable-version)
     - [Docker version](#usage-docker-version)
@@ -31,6 +32,7 @@ A command-line tool to download manga from [MangaDex](https://mangadex.org/), wr
 
 ## Key Features <a id="key-features"></a>
 
+- **Modern GUI application** with customtkinter for easy-to-use interface
 - Download manga, cover manga, chapter, or list directly from MangaDex
 - Download manga or list from user library
 - Find and download MangaDex URLs from MangaDex forums ([https://forums.mangadex.org/](https://forums.mangadex.org/))
@@ -45,6 +47,7 @@ A command-line tool to download manga from [MangaDex](https://mangadex.org/), wr
 - Legacy MangaDex url support
 - Save as raw images, EPUB, PDF, Comic Book Archive (.cbz or .cb7)
 - Respect API rate limit
+- **Both CLI and GUI available** - all CLI features accessible through GUI
 
 ***And ability to not download oneshot chapter***
 
@@ -77,8 +80,9 @@ You can also install optional dependencies
 - [py7zr](https://pypi.org/project/py7zr/) for cb7 support
 - [orjson](https://pypi.org/project/orjson/) for maximum performance (fast JSON library)
 - [lxml](https://pypi.org/project/lxml/) for EPUB support
+- [customtkinter](https://pypi.org/project/customtkinter/) for GUI support
 
-Or you can install all optional dependencies
+Or you can install all optional dependencies (including GUI)
 
 ```shell
 # For Windows
@@ -146,7 +150,56 @@ python setup.py install # or "pip install ."
 
 ## Usage <a id="usage"></a>
 
-### PyPI version <a id="usage-pypi-version"></a>
+### GUI (Graphical User Interface) <a id="usage-gui"></a>
+
+MangaDex Downloader now includes a modern GUI built with customtkinter! The GUI provides an easy-to-use interface with all CLI features accessible through a graphical interface.
+
+**📖 [Read full GUI documentation](GUI_USAGE.md)** | **🇻🇳 [Hướng dẫn tiếng Việt](GUI_HUONG_DAN.md)**
+
+![GUI Screenshot](https://github.com/user-attachments/assets/41c25f5d-dce2-4358-9984-fcb06cc59caa)
+
+**Installation:**
+
+First, install mangadex-downloader with optional dependencies (includes GUI support):
+
+```shell
+# For Windows
+py -3 -m pip install mangadex-downloader[optional]
+
+# For Linux / Mac OS
+python3 -m pip install mangadex-downloader[optional]
+```
+
+**Running the GUI:**
+
+```shell
+# After installing with [optional], you can run:
+mangadex-dl-gui
+
+# Or run directly from Python module
+python3 -m mangadex_downloader.gui
+
+# Or use the provided launcher script
+python3 run_gui.py
+```
+
+**GUI Features:**
+
+- **Download Tab**: Enter MangaDex URLs, select download types (manga, chapter, list, cover), configure language, format, and other download options
+- **Authentication Tab**: Login to MangaDex with OAuth2 or legacy authentication
+- **Settings Tab**: Configure download paths, network settings (proxy, timeout, DNS over HTTPS), and application preferences
+- **Logs Tab**: Real-time logging output to monitor download progress and troubleshoot issues
+
+All CLI features are available through the GUI, including:
+- Multiple download types (manga, chapter, list, cover)
+- All supported formats (raw, PDF, EPUB, CBZ, CB7)
+- Language selection
+- Chapter range selection
+- Authentication support
+- Network configuration (proxy, timeout, DNS over HTTPS)
+- And more!
+
+### CLI (Command Line Interface) <a id="usage-pypi-version"></a>
 
 ```shell
 
