@@ -107,13 +107,20 @@ class IteratorManga(MangaIterator):
         author_name = filters.pop("author_name", None)
         if author_name:
             # Search for authors by name and get their UUIDs
-            author_results = search_author(author_name, limit=5)
-            if author_results:
-                # Use the authorOrArtist parameter which accepts UUID
-                author_ids = [author["id"] for author in author_results]
-                # Use the first matching author
-                if author_ids:
-                    filters["author_or_artist"] = author_ids[0]
+            try:
+                author_results = search_author(author_name, limit=5)
+                if author_results:
+                    # Use the authorOrArtist parameter which accepts UUID
+                    author_ids = [author["id"] for author in author_results]
+                    # Use the first matching author
+                    if author_ids:
+                        filters["author_or_artist"] = author_ids[0]
+                        log.info(f"Found author '{author_results[0]['attributes']['name']}' (ID: {author_ids[0]})")
+                else:
+                    log.warning(f"No authors found matching '{author_name}'")
+            except Exception as e:
+                log.error(f"Error searching for author '{author_name}': {e}")
+                # Continue without author filter if search fails
 
         f = Filter()
         self._param_init = f.get_request_params(**filters)
