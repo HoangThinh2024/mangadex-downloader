@@ -64,6 +64,27 @@ app.mainloop()
 
 ## GUI Features
 
+### Search Tab
+
+The Search tab allows you to search for manga on MangaDex and browse results with cover images.
+
+**Features:**
+- **Search Input**: Enter manga title or keywords to search
+- **Search Results**: Browse manga with:
+  - Cover images (automatically loaded)
+  - Title and alternative titles
+  - Authors and artists
+  - Status and genres
+  - Description preview
+- **Download Button**: Click on any search result to load it into the Download tab
+
+**Usage:**
+1. Enter your search query (e.g., "One Piece", "Naruto")
+2. Click the Search button
+3. Browse through results with cover images
+4. Click "Download This Manga" on any result to prepare it for download
+5. Switch to Download tab to configure and start the download
+
 ### Download Tab
 
 The main tab for downloading manga from MangaDex.
@@ -216,7 +237,8 @@ All CLI features are available in the GUI. The GUI internally calls the same CLI
 
 **GUI Advantages:**
 - User-friendly interface
-- Visual feedback
+- Visual feedback with cover images
+- Search manga with visual preview
 - No need to remember commands
 - Easy configuration management
 
