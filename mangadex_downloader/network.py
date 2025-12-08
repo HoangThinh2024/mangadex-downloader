@@ -441,12 +441,16 @@ class requestsMangaDexSession(ModifiedSession):
 
     def _report(self, data):
         pbm.logger.debug("Reporting %s to MangaDex network" % data)
-        r = self.post("https://api.mangadex.network/report", json=data)
+        try:
+            r = self.post("https://api.mangadex.network/report", json=data)
 
-        if r.status_code != 200:
-            pbm.logger.debug("Failed to report %s to MangaDex network" % data)
-        else:
-            pbm.logger.debug("Successfully send report %s to MangaDex network" % data)
+            if r.status_code != 200:
+                pbm.logger.debug("Failed to report %s to MangaDex network" % data)
+            else:
+                pbm.logger.debug("Successfully send report %s to MangaDex network" % data)
+        except Exception as e:
+            # Report endpoint errors are non-critical, log and continue
+            pbm.logger.debug("Failed to report to MangaDex network: %s" % str(e))
 
     def report(self, data):
         """Report to MangaDex network"""

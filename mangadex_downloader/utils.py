@@ -250,8 +250,16 @@ class QueueWorker(threading.Thread):
             try:
                 job()
             except Exception as err:
-                log.error("We have problem in queue worker", exc_info=err)
-                fut.set_exception(err)
+                # Check if it's a non-critical MangaDex network report error
+                error_msg = str(err)
+                if "api.mangadex.network/report" in error_msg or "UnhandledHTTPError" in error_msg:
+                    # Log as warning instead of error, don't propagate exception
+                    log.warning("MangaDex network report failed (non-critical): %s" % error_msg)
+                    fut.set_result(None)
+                else:
+                    # Critical error, log and propagate
+                    log.error("We have problem in queue worker", exc_info=err)
+                    fut.set_exception(err)
             else:
                 fut.set_result(None)
 

@@ -1,6 +1,10 @@
 from fastapi import APIRouter, Query
 from mangadex_downloader.network import Net, base_url
 from typing import Optional
+import logging
+import re
+
+log = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/search", tags=["search"])
 
@@ -80,6 +84,7 @@ def search_manga(
     content_rating: str = Query(None),
     tags: str = Query(None),  # Comma-separated tag IDs to include
     excludedTags: str = Query(None),  # Comma-separated tag IDs to exclude
+    order: str = Query("latestUploadedChapter"),  # Order: latestUploadedChapter, createdAt, updatedAt, relevance
     limit: int = 12,
     offset: int = 0,
 ):
@@ -95,35 +100,74 @@ def search_manga(
     - offset: Pagination offset
     
     Note: If no title is provided, searches will use author/artist endpoints
+    If no search criteria at all, returns latest manga
     """
-    
-    # If no search criteria provided
-    if not title and not authors and not artists:
-        return {
-            "results": [],
-            "total": 0,
-            "limit": limit,
-            "offset": offset,
-        }
     
     # If searching only by author or artist without title
     if not title and (authors or artists):
         data = []  # Initialize data
         total = 0
         
-        # Strategy: Get recent popular manga and filter by author/artist name
-        # MangaDex API doesn't support filtering manga by author ID directly
+        # Strategy: First search for author/artist, then get their manga
         if authors or artists:
             try:
-                search_name = (authors or artists).lower()
+                search_input = authors or artists
                 
-                # Get popular/recent manga to filter from
-                manga_params = {
-                    "limit": 100,  # Fetch more manga to increase chances of finding matches
-                    "offset": 0,
-                    "includes[]": ["author", "artist", "cover_art"],
-                    "order[followedCount]": "desc",  # Get popular manga first
-                }
+                # Check if input is UUID (author ID) or name (text search)
+                is_uuid = bool(re.match(r'^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$', search_input.lower()))
+                
+                if is_uuid:
+                    # Direct search by author ID
+                    log.info(f"Searching manga by author ID: {search_input}")
+                    author_ids = [search_input]
+                else:
+                    # Search by name
+                    search_name = search_input.lower()
+                    log.info(f"Searching authors with name: {search_name}")
+                    
+                    # Step 1: Search for author/artist by name
+                    author_params = {
+                        "limit": 20,
+                        "name": search_name
+                    }
+                    author_url = f"{base_url}/author"
+                    author_res = Net.mangadex.get(author_url, params=author_params)
+                    author_data = author_res.json().get("data", [])
+                    
+                    log.info(f"Found {len(author_data)} authors")
+                    
+                    # Get author IDs that match
+                    author_ids = []
+                    for person in author_data:
+                        person_name = person.get("attributes", {}).get("name", "").lower()
+                        if search_name in person_name or person_name in search_name:
+                            author_ids.append(person.get("id"))
+                            log.info(f"Matched author: {person_name} (ID: {person.get('id')})")
+                
+                # Step 2: If found authors, search manga by author IDs
+                if author_ids:
+                    log.info(f"Searching manga by {len(author_ids)} author IDs")
+                    manga_params = {
+                        "limit": 100,
+                        "offset": 0,
+                        "includes[]": ["author", "artist", "cover_art"],
+                        "order[followedCount]": "desc",
+                        "contentRating[]": ["safe", "suggestive", "erotica", "pornographic"],  # Include all ratings
+                    }
+                    
+                    # Add author/artist IDs to search
+                    if authors:
+                        manga_params["authors[]"] = author_ids
+                    if artists:
+                        manga_params["artists[]"] = author_ids
+                else:
+                    # Fallback: Get popular manga and filter by name
+                    manga_params = {
+                        "limit": 100,
+                        "offset": 0,
+                        "includes[]": ["author", "artist", "cover_art"],
+                        "order[followedCount]": "desc",
+                    }
                 
                 if status:
                     manga_params["status[]"] = status
@@ -134,29 +178,45 @@ def search_manga(
                 else:
                     manga_params["contentRating[]"] = ["safe", "suggestive", "erotica", "pornographic"]
                 
+                # Add tag filtering
+                if tags:
+                    tag_ids = [t.strip() for t in tags.split(",") if t.strip()]
+                    if tag_ids:
+                        manga_params["includedTags[]"] = tag_ids
+                
+                # Add excluded tags filtering
+                if excludedTags:
+                    excluded_tag_ids = [t.strip() for t in excludedTags.split(",") if t.strip()]
+                    if excluded_tag_ids:
+                        manga_params["excludedTags[]"] = excluded_tag_ids
+                
                 manga_url = f"{base_url}/manga"
                 manga_res = Net.mangadex.get(manga_url, params=manga_params)
                 manga_response = manga_res.json()
                 
                 all_manga = manga_response.get("data", [])
                 
-                # Filter manga where author/artist name matches
-                filtered_manga = []
-                for manga in all_manga:
-                    relationships = manga.get("relationships", [])
-                    
-                    # Check if any author or artist matches
-                    match_found = False
-                    for rel in relationships:
-                        if rel.get("type") in ["author", "artist"]:
-                            person_name = rel.get("attributes", {}).get("name", "").lower()
-                            # Match if search name is in person name or vice versa
-                            if search_name in person_name or person_name in search_name:
-                                match_found = True
-                                break
-                    
-                    if match_found:
-                        filtered_manga.append(manga)
+                # If we used author IDs, results are already filtered
+                if author_ids:
+                    filtered_manga = all_manga
+                else:
+                    # Otherwise, filter manga where author/artist name matches
+                    filtered_manga = []
+                    for manga in all_manga:
+                        relationships = manga.get("relationships", [])
+                        
+                        # Check if any author or artist matches
+                        match_found = False
+                        for rel in relationships:
+                            if rel.get("type") in ["author", "artist"]:
+                                person_name = rel.get("attributes", {}).get("name", "").lower()
+                                # Match if search name is in person name or vice versa
+                                if search_name in person_name or person_name in search_name:
+                                    match_found = True
+                                    break
+                        
+                        if match_found:
+                            filtered_manga.append(manga)
                 
                 # Apply pagination
                 start_idx = min(max(offset, 0), len(filtered_manga))
@@ -170,20 +230,40 @@ def search_manga(
                 data = []
                 total = 0
     else:
-        # Normal search with title
+        # Normal search or default listing
         params = {
             "limit": min(max(limit, 1), 100),
             "offset": max(offset, 0),
             "includes[]": ["author", "artist", "cover_art"],
-            "order[latestUploadedChapter]": "desc",
         }
+        
+        # Set order parameter (default: latestUploadedChapter)
+        if order == "createdAt":
+            params["order[createdAt]"] = "desc"
+        elif order == "updatedAt":
+            params["order[updatedAt]"] = "desc"
+        elif order == "relevance" and title:
+            params["order[relevance]"] = "desc"
+        else:
+            params["order[latestUploadedChapter]"] = "desc"
         
         if title:
             params["title"] = title
+        
+        # Handle authors/artists - check if UUID or name
         if authors:
-            params["authors[]"] = authors
+            # Check if it's UUID (from autocomplete) or name (manual input)
+            if re.match(r'^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$', authors.lower()):
+                params["authors[]"] = [authors]
+            else:
+                params["authors[]"] = authors
+        
         if artists:
-            params["artists[]"] = artists
+            # Check if it's UUID (from autocomplete) or name (manual input)
+            if re.match(r'^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$', artists.lower()):
+                params["artists[]"] = [artists]
+            else:
+                params["artists[]"] = artists
         if status:
             params["status[]"] = status
         if languages:
@@ -204,12 +284,6 @@ def search_manga(
             excluded_tag_ids = [t.strip() for t in excludedTags.split(",") if t.strip()]
             if excluded_tag_ids:
                 params["excludedTags[]"] = excluded_tag_ids
-        
-        url = f"{base_url}/manga"
-        if tags:
-            tag_ids = [t.strip() for t in tags.split(",") if t.strip()]
-            if tag_ids:
-                params["includedTags[]"] = tag_ids
         
         url = f"{base_url}/manga"
         r = Net.mangadex.get(url, params=params)
@@ -241,7 +315,7 @@ def search_manga(
             "status": attr.get("status"),
             "originalLanguage": attr.get("originalLanguage"),
             "year": attr.get("year"),
-            "cover": cover_url,
+            "coverUrl": cover_url,
         })
     
     return {

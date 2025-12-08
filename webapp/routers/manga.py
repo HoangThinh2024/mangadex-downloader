@@ -60,20 +60,28 @@ async def get_manga_detail(
         else:
             title_str = str(title_obj)
         
+        # Get tags
+        tags = []
+        for tag_data in attributes.get("tags", []):
+            tag_name = tag_data.get("attributes", {}).get("name", {}).get("en")
+            if tag_name:
+                tags.append(tag_name)
+        
         return {
             "id": data.get("id"),
             "title": title_str,
             "description": attributes.get("description", {}).get("en"),
             "year": attributes.get("year"),
             "status": attributes.get("status"),
-            "cover": cover_url,
-            "content_rating": attributes.get("contentRating"),
-            "last_volume": attributes.get("lastVolume"),
-            "last_chapter": attributes.get("lastChapter"),
+            "coverUrl": cover_url,
+            "contentRating": attributes.get("contentRating"),
+            "lastVolume": attributes.get("lastVolume"),
+            "lastChapter": attributes.get("lastChapter"),
             "authors": authors,
             "artists": artists,
-            "original_language": attributes.get("originalLanguage"),
-            "alt_titles": attributes.get("altTitles"),
+            "tags": tags,
+            "originalLanguage": attributes.get("originalLanguage"),
+            "altTitles": attributes.get("altTitles"),
         }
     
     except Exception as e:
@@ -85,7 +93,7 @@ async def get_manga_detail(
 async def get_manga_chapters(
     manga_id: str,
     language: Optional[str] = Query(None, description="Filter by language"),
-    limit: int = Query(50, ge=1, le=500),
+    limit: int = Query(500, ge=1, le=500),
     offset: int = Query(0, ge=0),
 ):
     """Get chapters of a manga"""
@@ -95,13 +103,19 @@ async def get_manga_chapters(
             "limit": limit,
             "offset": offset,
             "includes[]": ["scanlation_group"],
+            "order[chapter]": "desc",  # Sort by chapter descending
+            "contentRating[]": ["safe", "suggestive", "erotica", "pornographic"],  # Include all ratings
         }
         
         if language:
-            params["translatedLanguage"] = [language]
+            params["translatedLanguage[]"] = [language]
+        
+        log.info(f"Fetching chapters for manga {manga_id} with params: {params}")
         
         result = Net.mangadex.get(f"https://api.mangadex.org/manga/{manga_id}/feed", params=params)
         data = result.json()
+        
+        log.info(f"Got {len(data.get('data', []))} chapters, total: {data.get('total', 0)}")
         
         formatted_chapters = []
         for item in data.get("data", []):
