@@ -67,17 +67,20 @@ async def _run(job_id: str, req: UrlDownloadRequest):
     
     # Path and folder structure
     if req.path:
-        download_path = req.path
+        base_path = req.path
     else:
         # Default to downloads folder in current directory
-        download_path = "./downloads"
+        base_path = "./downloads"
     
-    # Create download directory if it doesn't exist
-    Path(download_path).mkdir(parents=True, exist_ok=True)
+    # Create base download directory if it doesn't exist
+    Path(base_path).mkdir(parents=True, exist_ok=True)
     
+    # Use manga.title placeholder to auto-create manga folder
+    # This will create: ./downloads/{manga_title}/
+    download_path = f"{base_path}/{{manga.title}}"
     argv += ["--path", download_path]
     
-    # Always use chapter title to create separate manga folders
+    # Use chapter title in filename for better organization
     argv += ["--use-chapter-title"]
     
     # Log level
