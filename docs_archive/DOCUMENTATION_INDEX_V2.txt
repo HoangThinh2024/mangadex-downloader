@@ -1,0 +1,212 @@
+================================================================================
+        📚 MANGADEX DOWNLOADER v2.0 - DOCUMENTATION INDEX
+================================================================================
+
+🎯 BẮT ĐẦU NGAY (CHỌN MỘT):
+
+  1️⃣  CÓ 1 PHÚT?
+      → Đọc: README_V2.0.txt (Quick Start)
+      → Sau đó mở: http://localhost:8000
+
+  2️⃣  CÓ 5 PHÚT?
+      → Đọc: SUMMARY_V2.0.txt (Tổng kết v2.0)
+      → Đọc: USAGE_GUIDE_DETAILED.txt (Chi tiết từng tính năng)
+
+  3️⃣  CÓ 15 PHÚT?
+      → Đọc tất cả files dưới "📖 HƯỚNG DẪN CHI TIẾT"
+
+  4️⃣  DEVELOPER?
+      → Đọc: API_REFERENCE.txt (API endpoints)
+      → Xem code: webapp/templates/index.html, webapp/routers/search.py
+
+================================================================================
+📖 HƯỚNG DẪN CHI TIẾT (CHỌN THEO NHU CẦU)
+================================================================================
+
+1. README_V2.0.txt
+   📌 MỤC ĐÍCH: Quick start + Tóm tắt tính năng
+   📊 NỘI DUNG:
+      - Mỗi tính năng mới (7 tính năng)
+      - Cách khởi động (1 lệnh)
+      - Quick start 4 bước
+      - Test nhanh
+      - Troubleshooting
+   ⏱️  THỜI GIAN: 5 phút
+   👥 DÀNH CHO: Tất cả người dùng (BẮT ĐẦU TỪ ĐÂY!)
+
+2. SUMMARY_V2.0.txt
+   📌 MỤC ĐÍCH: Tổng kết đầy đủ v2.0
+   📊 NỘI DUNG:
+      - Tất cả tính năng đã hoàn thành
+      - Bảng tổng hợp
+      - File được cập nhật
+      - Test results
+      - Key improvements
+   ⏱️  THỜI GIAN: 7 phút
+   👥 DÀNH CHO: Muốn biết chi tiết tất cả tính năng
+
+3. USAGE_GUIDE_DETAILED.txt
+   📌 MỤC ĐÍCH: Hướng dẫn sử dụng chi tiết
+   📊 NỘI DUNG:
+      - Từng tab (Search, Download, Details)
+      - Từng field (kỳ vọng, ví dụ)
+      - 5 ví dụ thực tế
+      - API endpoints
+      - Troubleshooting
+   ⏱️  THỜI GIAN: 15 phút
+   👥 DÀNH CHO: Muốn dùng tất cả tính năng
+
+4. FEATURES_UPDATE_v2.txt
+   📌 MỤC ĐÍCH: Chi tiết 7 tính năng mới
+   📊 NỘI DUNG:
+      - Mỗi tính năng (cách hoạt động)
+      - API thay đổi
+      - Cách sử dụng mới
+      - Hạn chế
+   ⏱️  THỜI GIAN: 10 phút
+   👥 DÀNH CHO: Muốn hiểu từng tính năng
+
+5. API_REFERENCE.txt
+   📌 MỤC ĐÍCH: Tham khảo API
+   📊 NỘI DUNG:
+      - Tất cả endpoints (GET/POST)
+      - Parameters + response
+      - 39 language codes
+      - Curl examples
+      - Rate limiting
+   ⏱️  THỜI GIAN: 20 phút
+   👥 DÀNH CHO: Developer, sử dụng API trực tiếp
+
+================================================================================
+🎯 LỰA CHỌN THEO MỤC ĐÍCH
+================================================================================
+
+CẦN GÌ?                           → ĐỌCCÁI NÀY?
+──────────────────────────────────────────────────────────────
+Bắt đầu nhanh                     → README_V2.0.txt
+Hiểu tất cả tính năng             → SUMMARY_V2.0.txt
+Hướng dẫn sử dụng chi tiết        → USAGE_GUIDE_DETAILED.txt
+Biết API cần gì                   → API_REFERENCE.txt
+Tính năng cụ thể nào              → FEATURES_UPDATE_v2.0.txt
+Trạng thái server                 → README_FIX.txt (cũ)
+Lịch sử phiên làm việc            → SESSION_SUMMARY.txt
+
+================================================================================
+✅ CHYỀU CHUẨN BỊ - BƯỚC ĐẦU
+================================================================================
+
+1. Nhất định phải đọc:
+   ✓ README_V2.0.txt (5 phút)
+
+2. Khuyên nên đọc:
+   ✓ USAGE_GUIDE_DETAILED.txt (15 phút)
+
+3. Tùy chọn:
+   ☐ API_REFERENCE.txt (nếu là developer)
+   ☐ FEATURES_UPDATE_v2.txt (muốn chi tiết)
+   ☐ SUMMARY_V2.0.txt (tổng quát)
+
+================================================================================
+📊 TOÀN BỘ DOCUMENTATION
+================================================================================
+
+FILE                              LOẠI         KÍCH THƯỚC
+──────────────────────────────────────────────────────────
+README_V2.0.txt                   Guide        9.7 KB
+SUMMARY_V2.0.txt                  Summary      8.9 KB
+USAGE_GUIDE_DETAILED.txt          Guide        11.6 KB
+FEATURES_UPDATE_v2.txt            Reference    *
+API_REFERENCE.txt                 Reference    13.3 KB
+DOCUMENTATION_INDEX.txt (đây)    Index        *
+──────────────────────────────────────────────────────────
+Tổng cộng: ~44 KB
+
+CODE:
+webapp/templates/index.html       HTML+CSS+JS  41.5 KB
+webapp/routers/search.py          Python       6.5 KB
+──────────────────────────────────────────────────────────
+Tổng cộng: ~48 KB
+
+TỔNG DỮ LIỆU: ~92 KB (documentation + code)
+
+================================================================================
+🚀 CÁC BƯỚC KHUYÊN
+================================================================================
+
+THEO THỨ TỰ ĐỀ XUẤT:
+
+1. Khởi động server:
+   cd C:\mangadex-downloader
+   uv run python .\run_web.py
+
+2. Mở browser:
+   http://localhost:8000
+
+3. Đọc README_V2.0.txt (5 phút)
+
+4. Thử tính năng:
+   - Tab Search: "One Piece" → Thấy phân trang
+   - Tab Details: Xem ID/URL
+   - Tab Download: Nhập thư mục
+
+5. Nếu cần help, đọc USAGE_GUIDE_DETAILED.txt
+
+6. Nếu cần API, đọc API_REFERENCE.txt
+
+================================================================================
+💡 CÁCH NHANH NHẤT (3 PHÚT)
+================================================================================
+
+1. Chạy: uv run python .\run_web.py
+2. Mở: http://localhost:8000
+3. Search: "One Piece" → Click [Search Manga]
+4. Xem: Pagination buttons ở dưới
+5. Xem: ID trên mỗi card
+6. Click: "View" → Xem ID đầy đủ + URL
+7. Download: Paste ID → Chọn folder → Tải
+8. Đã sử dụng v2.0! ✅
+
+================================================================================
+🔗 QUICK LINKS
+================================================================================
+
+Bắt đầu:           README_V2.0.txt
+Chi tiết:          USAGE_GUIDE_DETAILED.txt
+API:               API_REFERENCE.txt
+Tóm tắt:           SUMMARY_V2.0.txt
+Tính năng:         FEATURES_UPDATE_v2.txt
+Web app:           http://localhost:8000
+API base:          http://localhost:8000/api
+
+================================================================================
+❓ CẦU HỎI THƯỜNG GẶP
+================================================================================
+
+Q: File nào đọc trước?
+A: README_V2.0.txt (bắt buộc)
+
+Q: Cần bao lâu để hiểu hết?
+A: README (5 phút) + USAGE_GUIDE (15 phút) = 20 phút
+
+Q: API ở đâu?
+A: API_REFERENCE.txt
+
+Q: Code ở đâu?
+A: webapp/templates/index.html (HTML+CSS+JS)
+   webapp/routers/search.py (Backend)
+
+Q: Có test không?
+A: Có, trong README_V2.0.txt (TEST NHANH)
+
+Q: Lỗi không biết xử lý sao?
+A: Xem Troubleshooting ở README_V2.0.txt + USAGE_GUIDE_DETAILED.txt
+
+================================================================================
+✨ ĐỦ ĐỂ BẮT ĐẦU! 
+================================================================================
+
+Hãy bắt đầu với README_V2.0.txt → Rồi khám phá app!
+
+Chúc bạn tải xuống truyện vui vẻ! 📚✨
+
+================================================================================

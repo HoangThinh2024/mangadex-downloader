@@ -1,0 +1,33 @@
+[project]
+name = "mangadex-downloader-web"
+version = "0.1.0"
+description = "Web interface for MangaDex Downloader"
+requires-python = ">=3.11"
+dependencies = [
+    # Web framework
+    "fastapi>=0.112",
+    "uvicorn[standard]>=0.30",
+    "Jinja2>=3.1",
+    "python-multipart>=0.0.9",
+    "itsdangerous>=2.1",
+    "orjson>=3.10",
+    
+    # Core dependencies
+    "requests-doh==1.0.0",
+    "requests[socks]>=2.31",
+    "tqdm>=4.66",
+    "pathvalidate>=3.0",
+    "packaging>=23.2",
+    "PyJWT>=2.8",
+    "beautifulsoup4>=4.12",
+    "Pillow>=10.1",
+    "chardet>=5.2",
+    "py7zr>=0.20",
+    "Authlib>=1.3",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "pytest-asyncio>=0.21",
+]

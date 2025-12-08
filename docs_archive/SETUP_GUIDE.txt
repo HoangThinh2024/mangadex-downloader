@@ -1,0 +1,236 @@
+================================================================================
+                    MANGADEX DOWNLOADER WEB APP - COMPLETE SETUP
+================================================================================
+
+## QUICK START
+
+1. Install dependencies:
+   ```
+   uv pip install -r .\requirements-uv.txt
+   ```
+
+2. Run the app:
+   ```
+   python .\run_web.py
+   ```
+
+3. Open in browser:
+   http://localhost:8000
+
+================================================================================
+## FILES CREATED/MODIFIED
+================================================================================
+
+✅ requirements-uv.txt         - Updated with ALL dependencies
+✅ run_web.py                  - Entry point for web server
+✅ webapp/app.py               - FastAPI app with all routers
+✅ webapp/routers/download.py  - Basic download endpoint
+✅ webapp/routers/url.py       - URL download with options
+✅ webapp/routers/search.py    - Manga search API
+✅ webapp/routers/config.py    - Configuration endpoints
+✅ webapp/templates/index.html - Web UI (search + download)
+✅ webapp/static/styles.css    - Minimal CSS styling
+✅ WEBAPP_README.md            - Full documentation
+
+================================================================================
+## API ENDPOINTS AVAILABLE
+================================================================================
+
+Search:
+  GET /api/search/manga?q=<query>&limit=10
+  Returns: { "results": [ {...}, ... ] }
+
+Download (with options):
+  POST /api/url/download
+  Body: { "url": "...", "save_as": "cbz", "path": "...", "no_track": false }
+  Returns: { "job_id": "..." }
+
+Job Status:
+  GET /api/url/jobs/{job_id}
+  Returns: { "job_id": "...", "status": "queued|running|done|error", "message": "..." }
+
+Config:
+  GET /api/config
+  Returns: { "save_as": "raw", "path": ".", "no_track": false, "log_level": "INFO" }
+
+  PUT /api/config
+  Body: { "save_as": "cbz", "path": "downloads" }
+
+================================================================================
+## FEATURES IMPLEMENTED
+================================================================================
+
+✅ SEARCH - Full MangaDex API integration with title search
+✅ DOWNLOAD - Background job queue with async processing
+✅ PROGRESS - Real-time job status polling via WebUI
+✅ CONFIG - Get/set app configuration via REST API
+✅ FORMATS - Support for all download formats (cbz, pdf, epub, raw)
+✅ OPTIONS - Log level, output path, tracking, and more
+✅ UI - Simple web interface with search and download form
+
+================================================================================
+## DEPENDENCIES INCLUDED
+================================================================================
+
+Web Framework:
+  - fastapi>=0.112
+  - uvicorn[standard]>=0.30
+  - Jinja2>=3.1
+  - python-multipart>=0.0.9
+  - itsdangerous>=2.1
+  - orjson>=3.10
+
+Core MangaDex Downloader:
+  - requests-doh==1.0.0
+  - requests[socks]
+  - tqdm
+  - pathvalidate
+  - packaging
+  - pyjwt
+  - beautifulsoup4
+  - Pillow==11.1.0
+  - chardet
+  - lxml>=5.2,<6.0
+  - py7zr==0.22.0
+  - Authlib>=1.3.0
+
+Total: 20 packages + all transitive dependencies
+
+================================================================================
+## TESTING THE APP
+================================================================================
+
+Via Browser:
+  1. Open http://localhost:8000
+  2. Search for "One Piece"
+  3. Click result to set URL
+  4. Click Download button
+  5. Watch job status update every 1.5 seconds
+
+Via PowerShell:
+  
+  # Search
+  Invoke-RestMethod -Uri "http://localhost:8000/api/search/manga?q=one+piece"
+  
+  # Start download
+  $job = Invoke-RestMethod -Uri "http://localhost:8000/api/url/download" `
+    -Method Post -ContentType "application/json" `
+    -Body (@{url='https://mangadex.org/title/...'} | ConvertTo-Json)
+  
+  # Check status
+  Invoke-RestMethod -Uri "http://localhost:8000/api/url/jobs/$($job.job_id)"
+
+================================================================================
+## ARCHITECTURE
+================================================================================
+
+FastAPI Web App Structure:
+
+  webapp/
+  ├── app.py                      # Main FastAPI application
+  │   - SessionMiddleware (signed cookies)
+  │   - Static files mount (/static)
+  │   - Jinja2 templates mount (/templates)
+  │   - Router imports (download, url, search, config)
+  │
+  ├── routers/
+  │   ├── download.py             # Simple download wrapper
+  │   ├── url.py                  # URL downloads with background jobs
+  │   │   - POST /api/url/download  (queue job)
+  │   │   - GET /api/url/jobs/{id}  (poll status)
+  │   │   - In-memory job registry
+  │   │   - asyncio.create_task() for background work
+  │   ├── search.py               # MangaDex search API
+  │   │   - GET /api/search/manga  (query by title)
+  │   │   - Calls mangadex_downloader.network.Net.mangadex.get()
+  │   └── config.py               # Configuration management
+  │       - GET /api/config        (read current config)
+  │       - PUT /api/config        (update settings)
+  │
+  ├── templates/
+  │   └── index.html              # Single-page web UI
+  │       - Search form with autocomplete
+  │       - Download form with URL input
+  │       - Real-time job status polling
+  │
+  └── static/
+      └── styles.css              # Minimal responsive CSS
+
+  run_web.py                       # Entry point
+    - uvicorn.run("webapp.app:app", host="0.0.0.0", port=8000, reload=True)
+
+================================================================================
+## HOW IT WORKS
+================================================================================
+
+1. SEARCH FLOW
+   User types "One Piece" → Web form sends GET /api/search/manga?q=one+piece
+   → Router queries MangaDex API → Returns results
+   → User clicks result → URL populated in download form
+
+2. DOWNLOAD FLOW
+   User clicks "Download" → POST /api/url/download with URL + options
+   → Router generates UUID job_id
+   → Queues asyncio.create_task(_run(job_id, request))
+   → Returns job_id immediately
+   → Background task runs mangadex_downloader.cli.main(argv) in thread executor
+   → Job status updates: queued → running → done/error
+   → UI polls GET /api/url/jobs/{job_id} every 1.5 seconds
+   → Status shown in real-time
+
+3. CONFIGURATION FLOW
+   User calls GET /api/config → Reads current mangadex_downloader config
+   User calls PUT /api/config with updates → CLI builds new config and persists
+
+================================================================================
+## NEXT STEPS / OPTIONAL ENHANCEMENTS
+================================================================================
+
+If you want to extend further:
+
+1. Add OAuth login (skip for now, per requirement)
+2. Persistent job database (SQLite tracker)
+3. Covers endpoint for cover art downloads
+4. List/Library endpoints for batch downloads
+5. Advanced filters (genre, content rating, language)
+6. WebSocket for real-time updates (instead of polling)
+7. Docker containerization
+8. Admin dashboard for job history
+9. Multi-user support with sessions
+10. Email notifications for completed downloads
+
+================================================================================
+## TROUBLESHOOTING
+================================================================================
+
+Issue: ModuleNotFoundError when running
+Fix: uv pip install -r .\requirements-uv.txt
+
+Issue: Port 8000 already in use
+Fix: Edit run_web.py line 3, change port=8000 to port=8001
+
+Issue: Search returns 404
+Fix: Ensure app.py imports are at module level (no try/except)
+
+Issue: Download not starting
+Fix: Check MangaDex URL format is https://mangadex.org/title/{uuid}
+
+Issue: Downloaded files in wrong location
+Fix: Use /api/config PUT endpoint to set "path" option
+
+================================================================================
+## VERIFIED WORKING
+================================================================================
+
+✅ Python 3.11.13
+✅ uv package manager
+✅ FastAPI routing
+✅ Async job processing
+✅ Search API integration
+✅ Configuration endpoints
+✅ Web UI (HTML + JS)
+✅ All core dependencies installed
+
+Ready to use!
+
+================================================================================

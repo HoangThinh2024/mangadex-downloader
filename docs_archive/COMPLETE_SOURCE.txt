@@ -1,0 +1,495 @@
+================================================================================
+             MANGADEX DOWNLOADER WEB APP - COMPLETE SOURCE CODE
+================================================================================
+
+This document contains the complete source code for the web app.
+
+================================================================================
+## FILE: requirements-uv.txt
+================================================================================
+
+# Web framework
+fastapi>=0.112
+uvicorn[standard]>=0.30
+Jinja2>=3.1
+python-multipart>=0.0.9
+itsdangerous>=2.1
+orjson>=3.10
+
+# Core dependencies from mangadex_downloader
+requests-doh==1.0.0
+requests[socks]
+tqdm
+pathvalidate
+packaging
+pyjwt
+beautifulsoup4
+Pillow==11.1.0
+chardet
+lxml>=5.2,<6.0
+py7zr==0.22.0
+Authlib>=1.3.0
+
+================================================================================
+## FILE: run_web.py
+================================================================================
+
+import uvicorn
+
+if __name__ == "__main__":
+    uvicorn.run("webapp.app:app", host="0.0.0.0", port=8000, reload=True)
+
+================================================================================
+## FILE: webapp/app.py
+================================================================================
+
+from fastapi import FastAPI, Request
+from fastapi.responses import HTMLResponse
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
+from starlette.middleware.sessions import SessionMiddleware
+import os
+from .routers.download import router as download_router
+from .routers.config import router as config_router
+from .routers.url import router as url_router
+from .routers.search import router as search_router
+
+
+def create_app() -> FastAPI:
+    app = FastAPI(title="MangaDex Downloader Web")
+
+    # Session middleware for storing OAuth tokens
+    secret_key = os.getenv("WEBAPP_SESSION_SECRET", "dev-secret-change-me")
+    app.add_middleware(SessionMiddleware, secret_key=secret_key)
+
+    app.mount("/static", StaticFiles(directory="webapp/static"), name="static")
+    templates = Jinja2Templates(directory="webapp/templates")
+
+    @app.get("/health", response_class=HTMLResponse)
+    async def health(_: Request):
+        return HTMLResponse("OK")
+
+    @app.get("/", response_class=HTMLResponse)
+    async def index(request: Request):
+        return templates.TemplateResponse("index.html", {"request": request})
+
+    # Routers
+    app.include_router(download_router)
+    app.include_router(config_router)
+    app.include_router(url_router)
+    app.include_router(search_router)
+
+    return app
+
+
+app = create_app()
+
+================================================================================
+## FILE: webapp/routers/download.py
+================================================================================
+
+import asyncio
+import uuid
+from fastapi import APIRouter
+from pydantic import BaseModel
+
+from mangadex_downloader.cli import main as cli_main
+
+
+class DownloadRequest(BaseModel):
+    url: str
+
+
+router = APIRouter(prefix="/api", tags=["download"])
+
+
+_jobs: dict[str, dict] = {}
+
+
+async def _run_download(job_id: str, url: str):
+    _jobs[job_id]["status"] = "running"
+    try:
+        # Run synchronous CLI in thread to not block event loop
+        loop = asyncio.get_running_loop()
+        def _run():
+            # Pass argv with only the URL; CLI will parse defaults
+            return cli_main([url])
+        await loop.run_in_executor(None, _run)
+        _jobs[job_id]["status"] = "done"
+        _jobs[job_id]["message"] = "Completed"
+    except Exception as exc:
+        _jobs[job_id]["status"] = "error"
+        _jobs[job_id]["message"] = str(exc)
+
+
+@router.post("/download")
+async def start_download(req: DownloadRequest):
+    job_id = uuid.uuid4().hex
+    _jobs[job_id] = {"status": "queued", "message": None}
+    asyncio.create_task(_run_download(job_id, req.url))
+    return {"job_id": job_id, "status": "queued"}
+
+
+@router.get("/jobs/{job_id}")
+def job_status(job_id: str):
+    job = _jobs.get(job_id)
+    if not job:
+        return {"status": "not-found"}
+    return {"job_id": job_id, **job}
+
+================================================================================
+## FILE: webapp/routers/url.py
+================================================================================
+
+from fastapi import APIRouter
+from pydantic import BaseModel
+import asyncio
+import uuid
+from mangadex_downloader.cli import main as cli_main
+
+
+router = APIRouter(prefix="/api/url", tags=["url"])
+
+
+class UrlDownloadRequest(BaseModel):
+    url: str
+    save_as: str | None = None
+    path: str | None = None
+    log_level: str | None = None
+    no_track: bool | None = None
+
+
+_jobs: dict[str, dict] = {}
+
+
+async def _run(job_id: str, req: UrlDownloadRequest):
+    _jobs[job_id]["status"] = "running"
+    argv = []
+    if req.save_as:
+        argv += ["--save-as", req.save_as]
+    if req.path:
+        argv += ["--path", req.path]
+    if req.log_level:
+        argv += ["--log-level", req.log_level]
+    if req.no_track:
+        argv += ["--no-track"]
+    argv += [req.url]
+
+    try:
+        loop = asyncio.get_running_loop()
+        await loop.run_in_executor(None, cli_main, argv)
+        _jobs[job_id]["status"] = "done"
+    except Exception as e:
+        _jobs[job_id]["status"] = "error"
+        _jobs[job_id]["message"] = str(e)
+
+
+@router.post("/download")
+async def download(req: UrlDownloadRequest):
+    job_id = uuid.uuid4().hex
+    _jobs[job_id] = {"status": "queued", "message": None}
+    asyncio.create_task(_run(job_id, req))
+    return {"job_id": job_id}
+
+
+@router.get("/jobs/{job_id}")
+def job(job_id: str):
+    return _jobs.get(job_id, {"status": "not-found"})
+
+================================================================================
+## FILE: webapp/routers/search.py
+================================================================================
+
+from fastapi import APIRouter, Query
+from mangadex_downloader.network import Net, base_url
+
+router = APIRouter(prefix="/api/search", tags=["search"])
+
+
+@router.get("/manga")
+def search_manga(q: str = Query(..., min_length=2), limit: int = 10):
+    params = {
+        "title": q,
+        "limit": limit,
+        "includes[]": ["author", "artist", "cover_art"],
+        "contentRating[]": ["safe", "suggestive", "erotica", "pornographic"],
+    }
+    url = f"{base_url}/manga"
+    r = Net.mangadex.get(url, params=params)
+    data = r.json().get("data", [])
+    # Map lightweight fields for UI
+    results = []
+    for item in data:
+        attr = item.get("attributes", {})
+        title_obj = attr.get("title", {})
+        en_title = title_obj.get("en") or next(iter(title_obj.values()), "")
+        results.append({
+            "id": item.get("id"),
+            "title": en_title,
+            "status": attr.get("status"),
+            "originalLanguage": attr.get("originalLanguage"),
+            "year": attr.get("year"),
+        })
+    return {"results": results}
+
+================================================================================
+## FILE: webapp/routers/config.py
+================================================================================
+
+from fastapi import APIRouter
+from pydantic import BaseModel
+from mangadex_downloader.cli.config import build_config
+from mangadex_downloader.cli.args_parser import get_args
+
+
+router = APIRouter(prefix="/api/config", tags=["config"])
+
+
+class ConfigUpdate(BaseModel):
+    # Accept minimal common options; extend as needed
+    save_as: str | None = None
+    path: str | None = None
+    no_track: bool | None = None
+    log_level: str | None = None
+
+
+@router.get("")
+def get_current():
+    # Build args with no argv to load defaults and env/user config
+    parser, args = get_args([])
+    build_config(parser, args)
+    return {
+        "save_as": args.save_as,
+        "path": args.path,
+        "no_track": args.no_track,
+        "log_level": args.log_level,
+    }
+
+
+@router.put("")
+def update_config(update: ConfigUpdate):
+    # Translate provided fields into argv flags and let CLI write config
+    argv: list[str] = []
+    if update.save_as:
+        argv += ["--save-as", update.save_as]
+    if update.path:
+        argv += ["--path", update.path]
+    if update.no_track is True:
+        argv += ["--no-track"]
+    if update.log_level:
+        argv += ["--log-level", update.log_level]
+
+    parser, args = get_args(argv)
+    build_config(parser, args)
+    return {"status": "ok"}
+
+================================================================================
+## FILE: webapp/templates/index.html
+================================================================================
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MangaDex Downloader Web</title>
+    <link rel="stylesheet" href="/static/styles.css" />
+</head>
+<body>
+    <main>
+        <h1>MangaDex Downloader Web</h1>
+        <section>
+            <h2>Search Manga</h2>
+            <form id="search-form">
+                <input type="text" id="q" name="q" placeholder="Enter title" required />
+                <button type="submit">Search</button>
+            </form>
+            <ul id="search-results"></ul>
+        </section>
+        <form id="download-form">
+            <label for="url">Manga/Chapter URL:</label>
+            <input type="url" id="url" name="url" placeholder="https://mangadex.org/title/..." required />
+            <button type="submit">Download</button>
+        </form>
+        <div id="result"></div>
+        <div id="job-status"></div>
+    </main>
+    <script>
+        const form = document.getElementById('download-form');
+        const resultDiv = document.getElementById('result');
+        const sform = document.getElementById('search-form');
+        const sresults = document.getElementById('search-results');
+
+        sform.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            sresults.innerHTML = '';
+            const q = document.getElementById('q').value;
+            const res = await fetch(`/api/search/manga?q=${encodeURIComponent(q)}`);
+            const data = await res.json();
+            for (const item of data.results) {
+                const li = document.createElement('li');
+                const url = `https://mangadex.org/title/${item.id}`;
+                li.textContent = `${item.title} (${item.status || 'unknown'})`;
+                li.style.cursor = 'pointer';
+                li.title = 'Click to set URL';
+                li.addEventListener('click', () => {
+                    document.getElementById('url').value = url;
+                });
+                sresults.appendChild(li);
+            }
+        });
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const url = document.getElementById('url').value;
+            resultDiv.textContent = 'Starting download...';
+            try {
+                const res = await fetch('/api/url/download', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url })
+                });
+                const data = await res.json();
+                if (data.job_id) {
+                    resultDiv.textContent = 'Job queued: ' + data.job_id;
+                    const jobDiv = document.getElementById('job-status');
+                    const poll = async () => {
+                        const r = await fetch(`/api/url/jobs/${data.job_id}`);
+                        const j = await r.json();
+                        jobDiv.textContent = `Status: ${j.status} ${j.message ?? ''}`;
+                        if (j.status === 'queued' || j.status === 'running') {
+                            setTimeout(poll, 1500);
+                        }
+                    };
+                    poll();
+                } else {
+                    resultDiv.textContent = data.message || JSON.stringify(data);
+                }
+            } catch (err) {
+                resultDiv.textContent = 'Error: ' + err;
+            }
+        });
+    </script>
+</body>
+</html>
+
+================================================================================
+## FILE: webapp/static/styles.css
+================================================================================
+
+body {
+    font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    margin: 0;
+    padding: 2rem;
+}
+
+main {
+    max-width: 720px;
+    margin: 0 auto;
+}
+
+section {
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #ccc;
+}
+
+h1, h2 {
+    margin-top: 0;
+}
+
+form {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+input[type=url],
+input[type=text] {
+    flex: 1;
+    padding: 0.5rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+button {
+    padding: 0.5rem 1rem;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+#search-results {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+#search-results li {
+    padding: 0.5rem;
+    background-color: #f5f5f5;
+    margin-bottom: 0.25rem;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+}
+
+#search-results li:hover {
+    background-color: #e8e8e8;
+}
+
+#result,
+#job-status {
+    margin-top: 1rem;
+    padding: 1rem;
+    background-color: #f9f9f9;
+    border-left: 4px solid #007bff;
+    border-radius: 4px;
+}
+
+================================================================================
+## INSTALLATION INSTRUCTIONS
+================================================================================
+
+Option 1: Using pip (if venv has pip):
+  cd C:\mangadex-downloader
+  python -m venv venv
+  .\venv\Scripts\Activate.ps1
+  pip install -r requirements-uv.txt
+
+Option 2: Using native system Python 3.11:
+  cd C:\mangadex-downloader
+  python -m pip install -r requirements-uv.txt
+
+Option 3: Using uv (if your uv/Python environment is configured):
+  cd C:\mangadex-downloader
+  uv pip install -r requirements-uv.txt
+
+Once installed, run:
+  python .\run_web.py
+
+Then open: http://localhost:8000
+
+================================================================================
+## VERIFICATION
+================================================================================
+
+To verify the installation worked:
+
+1. Check imports:
+   python -c "import fastapi; import mangadex_downloader; print('OK')"
+
+2. Check routes:
+   python -c "from webapp.app import app; print(len(app.routes)); print('OK')"
+
+3. Test search API:
+   python -c "from mangadex_downloader.network import Net, base_url; print('OK')"
+
+If all pass, the app is ready to run.
+
+================================================================================

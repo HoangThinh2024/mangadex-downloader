@@ -1,0 +1,357 @@
+================================================================================
+        HƯỚNG DẪN CHI TIẾT - MANGADEX DOWNLOADER v2.0 (2024)
+================================================================================
+
+🎯 TỔNG QUAN
+================================================================================
+
+Webapp này cung cấp giao diện web để:
+1. Tìm kiếm truyện từ MangaDex (toàn bộ dữ liệu)
+2. Xem chi tiết truyện (authors, artists, chapters)
+3. Tải xuống truyện (PDF, EPUB, CBZ, JPG/PNG)
+4. Chọn thư mục lưu trữ
+
+🚀 KHỞI ĐỘNG SERVER
+================================================================================
+
+Windows PowerShell:
+  cd C:\mangadex-downloader
+  uv run python .\run_web.py
+
+Mở browser:
+  http://localhost:8000
+
+================================================================================
+📍 TAB 1: SEARCH (TÌM KIẾM)
+================================================================================
+
+CHỨC NĂNG CHÍNH:
+- Tìm truyện theo tên
+- Lọc theo nhiều tiêu chí
+- Xem 12-100 kết quả mỗi trang
+- Duyệt qua các trang
+
+FIELDS (Các trường nhập):
+
+  1. Manga Title * (BẮTBUỘC)
+     - Nhập tên truyện muốn tìm
+     - Ví dụ: "One Piece", "Naruto", "Bleach", "Dragon Ball"
+     - API sẽ tìm tất cả truyện chứa từ khóa này
+
+  2. Author (Search) - TÙY CHỌN
+     - Nhập tên tác giả
+     - Ví dụ: "Masashi Kishimoto" (tác giả Naruto)
+     - Ví dụ: "Eiichiro Oda" (tác giả One Piece)
+     - Kết hợp với Title để tìm chính xác
+
+  3. Artist (Search) - TÙY CHỌN
+     - Nhập tên họa sĩ
+     - Khác với tác giả (tác giả viết, họa sĩ vẽ)
+
+  4. Status (Trạng thái) - TÙY CHỌN
+     - Any Status (tất cả)
+     - Ongoing (đang tiếp diễn)
+     - Completed (hoàn thành)
+     - Hiatus (tạm dừng)
+     - Cancelled (bị hủy)
+
+  5. Original Language (Ngôn ngữ gốc) - TÙY CHỌN
+     - 39 ngôn ngữ:
+       * Tiếng Anh (English)
+       * Tiếng Nhật (Japanese) - 日本語
+       * Tiếng Trung (Chinese - Simplified/Traditional)
+       * Tiếng Hàn (Korean)
+       * Tiếng Tây Ban Nha (Spanish)
+       * Tiếng Pháp (French)
+       * Tiếng Đức (German)
+       * Tiếng Ý (Italian)
+       * Tiếng Bồ Đào Nha (Portuguese)
+       * Tiếng Nga (Russian)
+       * Tiếng Ả Rập (Arabic)
+       * Tiếng Hindi (Hindi)
+       * Tiếng Thái (Thai)
+       * Tiếng Việt (Vietnamese)
+       * Tiếng Ba Lan (Polish)
+       * Tiếng Ukraina (Ukrainian)
+       * Tiếng Indonesia (Indonesian)
+       * Tiếng Thổ Nhĩ Kỳ (Turkish)
+       * ... và nhiều ngôn ngữ khác
+
+  6. Content Rating (Xếp hạng nội dung) - TÙY CHỌN
+     - Any Rating (tất cả)
+     - Safe (an toàn)
+     - Suggestive (gợi dục)
+     - Erotica (kích dục)
+     - Pornographic (khiêu dâm)
+
+  7. Results Per Page (Kết quả mỗi trang) - TÙY CHỌN
+     - Mặc định: 12
+     - Tối đa: 100
+     - Min: 1
+
+NÚT "Search Manga":
+  - Click để tìm kiếm
+  - Kết quả hiển thị dưới dạng lưới card
+
+KỆT QUẢ HIỂN THỊ:
+  - Hình cover (từ MangaDex CDN)
+  - Tên truyện
+  - Trạng thái (ongoing/completed)
+  - ID rút gọn (8 ký tự)
+  - 2 nút: "Download" & "View"
+
+NGOÀI KẾT QUẢ (Metadata):
+  - "Found XXX manga" - Tổng số kết quả
+  - "Showing page X" - Trang hiện tại
+
+PHÂN TRANG:
+  - Previous button (vô hiệu nếu trang 1)
+  - Nút số trang (có thể nhảy tới trang cụ thể)
+  - "..." nếu có gap giữa trang
+  - Next button (vô hiệu nếu là trang cuối)
+  - "Page X of Y" - Hiển thị vị trí
+
+================================================================================
+📍 TAB 2: DOWNLOAD (TẢI XUỐNG)
+================================================================================
+
+CHỨC NĂNG CHÍNH:
+- Tải truyện về máy
+- Chọn định dạng (PDF, EPUB, CBZ)
+- Chọn ngôn ngữ dịch
+- Chọn phạm vi chapter
+- Chọn scanlation group
+- Chọn thư mục lưu
+
+FIELDS:
+
+  1. Manga URL or ID * (BẮTBUỘC)
+     - Cách nhập 1: Paste URL từ MangaDex
+       ví dụ: https://mangadex.org/title/a1c7c817-4e59-43b7-9365-09675a149a6f
+     - Cách nhập 2: Paste ID (UUID)
+       ví dụ: a1c7c817-4e59-43b7-9365-09675a149a6f
+     - Hoặc click "Download" từ search results → tự điền
+
+  2. Format (Định dạng) - TÙY CHỌN
+     - Auto Detect (tự nhận diện)
+     - PDF (Portable Document Format)
+     - EPUB (Electronic Publication - e-book)
+     - CBZ (Comic Book Archive - ảnh nén)
+     - Raw Images (JPG/PNG - raw images)
+
+  3. Language (Ngôn ngữ dịch) - TÙY CHỌN
+     - Default (All) - tất cả ngôn ngữ
+     - English - tiếng Anh dịch
+     - Japanese - tiếng Nhật gốc
+     - Chinese - tiếng Trung dịch
+     - Korean - tiếng Hàn dịch
+     - Spanish - tiếng Tây Ban Nha
+     - French - tiếng Pháp
+
+  4. Start Chapter (Chapter bắt đầu) - TÙY CHỌN
+     - Ví dụ: "1" (từ chapter 1)
+     - Ví dụ: "50" (từ chapter 50)
+     - Để trống = từ đầu
+
+  5. End Chapter (Chapter kết thúc) - TÙY CHỌN
+     - Ví dụ: "100" (đến chapter 100)
+     - Ví dụ: "50" (đến chapter 50)
+     - Để trống hoặc "latest" = đến cuối
+
+  6. Scanlation Group (Nhóm dịch) - TÙY CHỌN
+     - Nhập tên nhóm dịch
+     - Để trống = tất cả nhóm
+     - Ví dụ: "MangaPlus", "Official"
+
+  7. Save Directory (Thư mục lưu) - TÙY CHỌN
+     - Nhập đường dẫn:
+       Windows: C:\Users\YourName\Downloads\Manga
+       hoặc: C:\Manga
+     - Để trống = dùng đường dẫn mặc định của app
+     - Lưu ý: Server phải có quyền truy cập thư mục
+
+  8. Don't track this download (Không theo dõi)
+     - Tích nếu không cần status tracking
+     - Mặc định: không tích (có tracking)
+
+NÚT "Start Download":
+  - Click để bắt đầu tải
+  - Trạng thái sẽ hiển thị dưới
+
+DOWNLOAD STATUS (Trạng thái tải):
+  - Status: downloading, done, error
+  - Message: Chi tiết tác vụ
+
+================================================================================
+📍 TAB 3: DETAILS (CHI TIẾT TRUYỆN)
+================================================================================
+
+CHỨC NĂNG CHÍNH:
+- Xem đầy đủ thông tin truyện
+- Xem cover, authors, artists
+- Xem 50 chapter gần nhất
+- Xem ID đầy đủ & link MangaDex
+
+CÁCH SỬ DỤNG:
+
+  1. Nhập ID hoặc URL:
+     - ID: a1c7c817-4e59-43b7-9365-09675a149a6f
+     - URL: https://mangadex.org/title/a1c7c817-4e59-43b7-9365-09675a149a6f
+
+  2. Click "Load Details"
+
+THÔNG TIN HIỂN THỊ:
+
+  📷 Cover (Hình bìa)
+     - Ảnh cover từ MangaDex
+
+  📚 Manga ID
+     - ID đầy đủ (UUID)
+     - Copy để dùng ở Download tab
+
+  🌐 Manga URL
+     - Link tới mangadex.org
+     - Click để mở trang chính thức
+
+  📖 Description (Mô tả)
+     - Tóm tắt nội dung truyện
+
+  📊 Thống kê:
+     - Status: ongoing/completed
+     - Year: Năm xuất bản
+     - Rating: Content rating
+
+  ✍️  Authors (Tác giả)
+     - Danh sách tác giả
+     - Có thể có nhiều tác giả
+
+  🎨 Artists (Họa sĩ)
+     - Danh sách họa sĩ
+     - Có thể khác với tác giả
+
+  📑 Latest Chapters (50 chapter gần nhất):
+     - Chapter number
+     - Tiêu đề chapter
+     - Số trang
+     - Ngày upload
+
+================================================================================
+💡 CÁC VÍ DỤ SỬ DỤNG
+================================================================================
+
+VÍ DỤ 1: Tìm One Piece
+  1. Tab Search
+  2. Title: "One Piece"
+  3. Click "Search Manga"
+  4. Kết quả: ~95 kết quả
+  5. Duyệt qua các trang
+  6. Click "Download" trên card One Piece
+  → Chuyển tới Download tab, ID tự điền
+
+VÍ DỤ 2: Tìm truyện của Masashi Kishimoto
+  1. Tab Search
+  2. Title: "Naruto"
+  3. Author: "Masashi Kishimoto"
+  4. Click "Search Manga"
+  5. Kết quả: Chỉ truyện của tác giả này
+
+VÍ DỤ 3: Tìm truyện ngôn ngữ gốc là Tiếng Nhật
+  1. Tab Search
+  2. Title: "Bleach"
+  3. Language: "Japanese"
+  4. Click "Search Manga"
+  5. Kết quả: Truyện gốc tiếng Nhật
+
+VÍ DỤ 4: Tải Naruto (chapter 1-100, PDF)
+  1. Tab Download
+  2. URL or ID: a1c7c817-4e59-43b7-9365-09675a149a6f
+  3. Format: "PDF"
+  4. Start Chapter: "1"
+  5. End Chapter: "100"
+  6. Save Directory: "C:\Manga\Naruto"
+  7. Click "Start Download"
+  → Chờ status "done"
+
+VÍ DỤ 5: Xem chi tiết One Piece
+  1. Tab Details
+  2. ID: a1c7c817-4e59-43b7-9365-09675a149a6f
+  3. Click "Load Details"
+  4. Xem cover, authors, chapters
+
+================================================================================
+🔗 API ENDPOINTS (CHO DEVELOPER)
+================================================================================
+
+GET /api/search/manga
+  Tìm kiếm truyện
+  Params: title, authors, artists, status, languages, content_rating, limit, offset
+  Response: results[], total, limit, offset
+
+GET /api/search/languages
+  Danh sách 39 ngôn ngữ
+
+GET /api/search/authors?query=...
+  Tìm tác giả
+
+GET /api/search/artists?query=...
+  Tìm họa sĩ
+
+POST /api/url/download
+  Tải truyện
+  Body: url, save_as, language, start_chapter, end_chapter, groups, path, no_track
+
+GET /api/manga/{id}
+  Chi tiết truyện
+
+GET /api/manga/{id}/chapters?limit=50
+  Danh sách chapters
+
+GET /api/url/jobs/{job_id}
+  Trạng thái tải
+
+================================================================================
+⚙️  TROUBLESHOOTING
+================================================================================
+
+❌ Server không khởi động
+   Giải pháp:
+   - Kiểm tra port 8000 có bị dùng: netstat -ano | findstr :8000
+   - Đổi port trong run_web.py: port=8001
+   - Restart terminal & thử lại
+
+❌ Không tìm được kết quả
+   Giải pháp:
+   - Kiểm tra tên truyện (spelling)
+   - Thử bằng tiếng Anh
+   - Bỏ các bộ lọc tùy chọn (Authors, Artists)
+   - Tăng limit lên 100
+
+❌ Download không hoạt động
+   Giải pháp:
+   - Kiểm tra ID/URL chính xác
+   - Thử format khác (PDF thay vì EPUB)
+   - Kiểm tra quyền thư mục Save Directory
+   - Xem error message trong Download Status
+
+❌ Hình cover không load
+   Giải pháp:
+   - Kiểm tra kết nối internet
+   - MangaDex CDN có thể bị chậm
+   - Reload trang
+
+❌ Pagination không hoạt động
+   Giải pháp:
+   - Chắc chắn limit < 100
+   - Total result > limit
+   - Không search với filter quá hạn chế
+
+================================================================================
+📝 GHI CHÚ
+================================================================================
+
+- Toàn bộ dữ liệu lấy từ MangaDex API (chỉ đọc)
+- Không upload/sửa dữ liệu lên MangaDex
+- Chỉ dùng cho mục đích cá nhân
+- MangaDex có ToS - cần tuân thủ
+
+================================================================================

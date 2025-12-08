@@ -1,0 +1,227 @@
+
+╔════════════════════════════════════════════════════════════════════════════╗
+║                                                                            ║
+║          MANGADEX DOWNLOADER WEB APP - INSTALLATION COMPLETE ✓             ║
+║                     uv (Astral Python) Compatible                         ║
+║                                                                            ║
+╚════════════════════════════════════════════════════════════════════════════╝
+
+┌─ WHAT YOU HAVE ─────────────────────────────────────────────────────────┐
+│                                                                          │
+│  ✅ Complete Web App           FastAPI + 20+ dependencies              │
+│  ✅ API Endpoints              Search, Download, Config, Status        │
+│  ✅ Web Interface              Modern HTML/CSS/JS UI                   │
+│  ✅ Background Jobs            Async download processing               │
+│  ✅ Real-time Status           Poll job progress every 1.5s            │
+│  ✅ Multiple Formats           CBZ, PDF, EPUB, RAW, 7Z                 │
+│  ✅ Auto-Install Script        One-command setup                       │
+│  ✅ Full Documentation         6+ guides included                      │
+│                                                                          │
+└──────────────────────────────────────────────────────────────────────────┘
+
+┌─ INSTALLATION (CHOOSE ONE) ─────────────────────────────────────────────┐
+│                                                                          │
+│  🔧 FASTEST - Run automatic script:                                    │
+│     cd C:\mangadex-downloader                                          │
+│     .\install-uv.ps1                                                   │
+│                                                                          │
+│  📦 MODERN - Use uv sync:                                              │
+│     cd C:\mangadex-downloader                                          │
+│     uv sync                                                             │
+│     .\.venv\Scripts\Activate.ps1                                       │
+│                                                                          │
+│  🚀 DIRECT - No venv activation:                                       │
+│     cd C:\mangadex-downloader                                          │
+│     uv run python .\run_web.py                                         │
+│                                                                          │
+│  🔨 TRADITIONAL - If uv fails:                                         │
+│     cd C:\mangadex-downloader                                          │
+│     python -m venv venv                                                │
+│     .\venv\Scripts\Activate.ps1                                        │
+│     pip install -r requirements-uv.txt                                 │
+│                                                                          │
+└──────────────────────────────────────────────────────────────────────────┘
+
+┌─ RUNNING THE APP ───────────────────────────────────────────────────────┐
+│                                                                          │
+│  After installation, run one of these commands:                        │
+│                                                                          │
+│  # Option 1: With venv activated                                       │
+│  .\.venv\Scripts\Activate.ps1                                          │
+│  python .\run_web.py                                                   │
+│                                                                          │
+│  # Option 2: Without venv activation                                   │
+│  uv run python .\run_web.py                                            │
+│                                                                          │
+│  # Option 3: Use manual venv                                           │
+│  .\venv\Scripts\Activate.ps1                                           │
+│  python .\run_web.py                                                   │
+│                                                                          │
+│  Then open: http://localhost:8000                                      │
+│                                                                          │
+└──────────────────────────────────────────────────────────────────────────┘
+
+┌─ FEATURES ──────────────────────────────────────────────────────────────┐
+│                                                                          │
+│  🔍 SEARCH                                                              │
+│     • Search manga by title in real-time                               │
+│     • Direct MangaDex API integration                                  │
+│     • Click to auto-fill download URL                                  │
+│                                                                          │
+│  ⬇️  DOWNLOAD                                                           │
+│     • Queue downloads with background jobs                            │
+│     • Support all formats: CBZ, PDF, EPUB, RAW, 7Z                    │
+│     • Custom output path & naming                                      │
+│     • Multiple parallel downloads                                      │
+│                                                                          │
+│  📊 PROGRESS                                                            │
+│     • Real-time job status polling                                     │
+│     • Visual status indicator (queued → running → done)                │
+│     • Error messages and logs                                          │
+│                                                                          │
+│  ⚙️  CONFIGURATION                                                      │
+│     • GET/PUT config via REST API                                      │
+│     • Persist settings automatically                                   │
+│     • Log level control (DEBUG, INFO, WARNING, ERROR)                  │
+│                                                                          │
+│  🔌 REST API                                                            │
+│     • Full API documentation at /docs                                  │
+│     • Interactive Swagger UI                                           │
+│     • All endpoints documented                                         │
+│                                                                          │
+│  🌐 WEB UI                                                              │
+│     • Modern, responsive single-page app                               │
+│     • Search form with auto-complete                                   │
+│     • Download form with options                                       │
+│     • Real-time status display                                         │
+│                                                                          │
+└──────────────────────────────────────────────────────────────────────────┘
+
+┌─ API ENDPOINTS ─────────────────────────────────────────────────────────┐
+│                                                                          │
+│  GET  /health                                     Health check          │
+│  GET  /                                           Web UI                │
+│  GET  /api/search/manga?q=...                     Search                │
+│  POST /api/url/download                           Queue download        │
+│  GET  /api/url/jobs/{id}                          Check status          │
+│  GET  /api/config                                 Get config            │
+│  PUT  /api/config                                 Update config         │
+│  GET  /docs                                       API documentation     │
+│  GET  /redoc                                      Alternative docs      │
+│                                                                          │
+└──────────────────────────────────────────────────────────────────────────┘
+
+┌─ VERIFICATION ──────────────────────────────────────────────────────────┐
+│                                                                          │
+│  Test installation before running:                                    │
+│  uv run python test_install.py                                        │
+│                                                                          │
+│  Expected output:                                                      │
+│  ✓ fastapi                                                             │
+│  ✓ uvicorn                                                             │
+│  ✓ jinja2                                                              │
+│  ✓ requests                                                            │
+│  ✓ mangadex_downloader                                                │
+│  ... (more modules)                                                    │
+│  ✓ Results: 16/16 passed                                              │
+│  ✓ All dependencies installed correctly!                              │
+│                                                                          │
+└──────────────────────────────────────────────────────────────────────────┘
+
+┌─ TROUBLESHOOTING ───────────────────────────────────────────────────────┐
+│                                                                          │
+│  ❌ "uv: command not found"                                            │
+│     → pip install uv                                                   │
+│                                                                          │
+│  ❌ "ModuleNotFoundError: chardet"                                     │
+│     → uv sync --fresh                                                  │
+│                                                                          │
+│  ❌ "Port 8000 already in use"                                         │
+│     → Edit run_web.py, change port=8000 to port=8001                  │
+│                                                                          │
+│  ❌ "Can't activate venv"                                              │
+│     → Use: uv run python .\run_web.py (no activation needed)           │
+│                                                                          │
+│  ❌ Dependencies still missing                                          │
+│     → uv sync --upgrade                                                │
+│                                                                          │
+└──────────────────────────────────────────────────────────────────────────┘
+
+┌─ DOCUMENTATION ─────────────────────────────────────────────────────────┐
+│                                                                          │
+│  📖 START_HERE.txt              Complete installation guide             │
+│  📖 SIMPLE_INSTALL.txt          Quick start (READ FIRST!)              │
+│  📖 UV_INSTALL.txt              Detailed UV guide                      │
+│  📖 WEBAPP_README.md            Full API documentation                 │
+│  📖 COMPLETE_SOURCE.txt         All source code                        │
+│  📖 README_WEBAPP.txt           Feature overview                       │
+│                                                                          │
+│  All documentation is in the project root directory!                   │
+│                                                                          │
+└──────────────────────────────────────────────────────────────────────────┘
+
+┌─ QUICK START ───────────────────────────────────────────────────────────┐
+│                                                                          │
+│  1. Run automatic installer:                                           │
+│     .\install-uv.ps1                                                   │
+│                                                                          │
+│  2. Activate environment:                                              │
+│     .\.venv\Scripts\Activate.ps1                                       │
+│                                                                          │
+│  3. Start server:                                                      │
+│     python .\run_web.py                                                │
+│                                                                          │
+│  4. Open browser:                                                      │
+│     http://localhost:8000                                              │
+│                                                                          │
+│  5. Search and download:                                               │
+│     • Type "One Piece"                                                 │
+│     • Click result                                                     │
+│     • Click Download                                                   │
+│     • Watch status update!                                             │
+│                                                                          │
+└──────────────────────────────────────────────────────────────────────────┘
+
+┌─ FILES CREATED/MODIFIED ────────────────────────────────────────────────┐
+│                                                                          │
+│  Installation:                                                          │
+│  ✓ pyproject.toml              Modern project config for uv            │
+│  ✓ uv.lock                     Locked dependency versions              │
+│  ✓ requirements-uv.txt         Legacy requirements file                │
+│  ✓ install-uv.ps1             Automatic installation script            │
+│  ✓ test_install.py             Installation verification               │
+│                                                                          │
+│  Web App:                                                               │
+│  ✓ run_web.py                  Server entry point                      │
+│  ✓ webapp/app.py               FastAPI application                     │
+│  ✓ webapp/routers/             API endpoints (4 files)                 │
+│  ✓ webapp/templates/index.html Web UI                                  │
+│  ✓ webapp/static/styles.css    CSS styling                             │
+│                                                                          │
+│  Documentation:                                                         │
+│  ✓ START_HERE.txt              Master guide (you are here)             │
+│  ✓ SIMPLE_INSTALL.txt          3 quick options                         │
+│  ✓ UV_INSTALL.txt              Detailed guide                          │
+│  ✓ WEBAPP_README.md            API reference                           │
+│  ✓ COMPLETE_SOURCE.txt         Full source code                        │
+│                                                                          │
+│  Total: 20+ files created/modified                                     │
+│                                                                          │
+└──────────────────────────────────────────────────────────────────────────┘
+
+╔════════════════════════════════════════════════════════════════════════════╗
+║                                                                            ║
+║                         🎉 YOU'RE ALL SET! 🎉                             ║
+║                                                                            ║
+║  Choose your installation method from above and follow the steps.         ║
+║                                                                            ║
+║  Fastest:  .\install-uv.ps1                                              ║
+║  Modern:   uv sync && uv run python .\run_web.py                          ║
+║  Direct:   uv run python .\run_web.py                                     ║
+║                                                                            ║
+║  Then open: http://localhost:8000                                         ║
+║                                                                            ║
+║  Questions? See START_HERE.txt or SIMPLE_INSTALL.txt                     ║
+║                                                                            ║
+╚════════════════════════════════════════════════════════════════════════════╝
+

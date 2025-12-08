@@ -1,0 +1,272 @@
+================================================================================
+              MANGADEX DOWNLOADER - UPDATED FEATURES (v2.0)
+================================================================================
+
+NGÀY CẬP NHẬT: December 8, 2025
+PHIÊN BẢN: 2.0 - Complete Feature Update
+
+================================================================================
+TÍNH NĂNG MỚI ĐƯỢC THÊM VÀO
+================================================================================
+
+✅ 1. TÍNH NĂNG PHÂN TRANG (PAGINATION)
+   - Hỗ trợ phân trang trong tìm kiếm
+   - Có thể chọn số lượng kết quả mỗi trang (1-100)
+   - Hiển thị tổng số truyện tìm thấy (ví dụ: 95 kết quả cho "One Piece")
+   - Nút Previous/Next để duyệt trang
+   - Có thể nhảy đến trang cụ thể
+   - Hiển thị "Page X of Y"
+   
+   API: 
+   - GET /api/search/manga?title=...&limit=12&offset=0
+   - offset = trang * limit (để tính vị trí bắt đầu)
+
+✅ 2. HIỂN THỊ URL / ID CỦA TRUYỆN
+   - Mỗi card truyện hiển thị ID rút gọn (8 ký tự đầu)
+   - Click vào "View Details" để xem ID đầy đủ
+   - Tab Details hiển thị:
+     * Manga ID (đầy đủ) - copy được
+     * Manga URL: https://mangadex.org/title/{id}
+     * Có link trực tiếp đến MangaDex
+
+✅ 3. CHỨC NĂNG CHỌN THƯ MỤC TẢI XUỐNG
+   - Thêm field "Save Directory" vào Download Form
+   - Có thể nhập đường dẫn thư mục để lưu file
+   - Nếu để trống sẽ dùng đường dẫn mặc định của app
+   - Hỗ trợ cả đường dẫn tuyệt đối (C:\...) và tương đối
+
+✅ 4. TỈM KIẾM THEO TÁC GIẢ (AUTHOR)
+   - Thêm field "Author (Search)" để tìm kiếm theo tác giả
+   - Hoạt động cùng với các bộ lọc khác
+   - Ví dụ: Tìm kiếm "Naruto" + tác giả "Masashi Kishimoto"
+
+✅ 5. TÌM KIẾM THEO HỌA SĨ (ARTIST)
+   - Thêm field "Artist (Search)" để tìm kiếm theo họa sĩ
+   - Hoạt động độc lập hoặc kết hợp với các bộ lọc khác
+   - Giúp tìm truyện theo người vẽ cụ thể
+
+✅ 6. TOÀN BỘ DANH SÁCH NGÔN NGỮ MANGADEX (39 NGÔN NGỮ)
+   - English
+   - Japanese
+   - Chinese (Simplified)
+   - Chinese (Traditional)
+   - Korean
+   - Spanish
+   - French
+   - German
+   - Italian
+   - Portuguese
+   - Portuguese (Brazilian)
+   - Russian
+   - Arabic
+   - Hindi
+   - Thai
+   - Vietnamese
+   - Polish
+   - Ukrainian
+   - Indonesian
+   - Turkish
+   - Bengali
+   - Bulgarian
+   - Catalan
+   - Czech
+   - Welsh
+   - Danish
+   - Dutch
+   - Estonian
+   - Farsi
+   - Finnish
+   - Greek
+   - Hebrew
+   - Hungarian
+   - Japanese (Romanized)
+   - Javanese
+   - Kazakh
+   - Khmer
+   - Lao
+   - Lithuanian
+   - Macedonian
+   - Mongolian
+   - Malay
+   - Burmese
+   - Norwegian (Bokmål)
+   - Nepali
+   - Norwegian
+   - Odia
+   - Punjabi
+   - Romanian
+   - Slovak
+   - Slovenian
+   - Somali
+   - Serbian
+   - Swedish
+   - Tamil
+   - Telugu
+   - Filipino
+   - Urdu
+   - Uzbek
+   - Chinese (Romanized)
+
+✅ 7. LẤY TOÀN BỘ DỮ LIỆU TỪ MANGADEX
+   - API hỗ trợ lấy tất cả truyện từ MangaDex (không giới hạn)
+   - Phân trang cho phép duyệt từng trang
+   - Mỗi trang tối đa 100 kết quả
+   - Tổng số kết quả hiển thị rõ ràng
+
+================================================================================
+CẬP NHẬT API (BACKEND)
+================================================================================
+
+📍 GET /api/search/manga
+   Parameters:
+   - title (string, required): Tên truyện cần tìm
+   - authors (string, optional): Tên tác giả
+   - artists (string, optional): Tên họa sĩ
+   - status (string, optional): ongoing, completed, hiatus, cancelled
+   - languages (string, optional): Mã ngôn ngữ (ja, en, zh, ko, ...)
+   - content_rating (string, optional): safe, suggestive, erotica, pornographic
+   - limit (int, default=12, max=100): Số lượng kết quả trả về
+   - offset (int, default=0): Vị trí bắt đầu (dùng cho phân trang)
+
+   Response:
+   {
+     "results": [
+       {
+         "id": "manga-id",
+         "title": "Manga Title",
+         "status": "ongoing",
+         "originalLanguage": "ja",
+         "year": 1997,
+         "cover": "https://uploads.mangadex.org/covers/..."
+       }
+     ],
+     "total": 95,           // ← Tổng số kết quả (MỚI)
+     "limit": 12,           // ← Giới hạn mỗi trang (MỚI)
+     "offset": 0            // ← Vị trí hiện tại (MỚI)
+   }
+
+📍 GET /api/search/languages (MỚI)
+   Lấy danh sách tất cả 39 ngôn ngữ được hỗ trợ
+   Response:
+   {
+     "languages": [
+       {"code": "en", "name": "English"},
+       {"code": "ja", "name": "Japanese"},
+       ...
+     ]
+   }
+
+📍 GET /api/search/authors (MỚI)
+   Tìm kiếm tác giả
+   Parameters: query (string)
+   Response:
+   {
+     "authors": [
+       {"id": "author-id", "name": "Author Name"}
+     ]
+   }
+
+📍 GET /api/search/artists (MỚI)
+   Tìm kiếm họa sĩ
+   Parameters: query (string)
+   Response:
+   {
+     "artists": [
+       {"id": "artist-id", "name": "Artist Name"}
+     ]
+   }
+
+================================================================================
+CÁCH SỬ DỤNG MỚI
+================================================================================
+
+1️⃣ TÌMM KIẾM BASIC:
+   - Nhập tên truyện (bắt buộc)
+   - Chọn số kết quả mỗi trang
+   - Click "Search Manga"
+   - Duyệt qua các trang bằng pagination buttons
+
+2️⃣ TÌMM KIẾM NÂNG CAO:
+   - Tên truyện + Tác giả → Tìm truyện của tác giả cụ thể
+   - Tên truyện + Họa sĩ → Tìm truyện được vẽ bởi người cụ thể
+   - Tên truyện + Ngôn ngữ → Tìm truyện gốc từ nước cụ thể
+   - Tên truyện + Status → Tìm truyện đang tiếp diễn hoặc hoàn thành
+   - Kết hợp tất cả các bộ lọc trên
+
+3️⃣ XEM CHI TIẾT TRUYỆN:
+   - Click "View" trên card truyện, HOẶC
+   - Tab "Details" → nhập ID/URL → "Load Details"
+   - Kết quả: ID, URL, Cover, Authors, Artists, Chapters
+
+4️⃣ TẢI XUỐNG TRUYỆN:
+   - Tab "Download" → Paste URL hoặc ID
+   - Chọn Format (PDF, EPUB, CBZ, Raw)
+   - Chọn Ngôn ngữ
+   - Nhập Chapter Range (tùy chọn)
+   - Nhập Save Directory (hoặc để trống)
+   - Click "Start Download"
+
+================================================================================
+CẬP NHẬT UI
+================================================================================
+
+🎨 Giao diện được cải thiện:
+   ✓ Thêm "Search Meta" hiển thị tổng số kết quả
+   ✓ Hiển thị ID rút gọn trên mỗi card (8 ký tự)
+   ✓ Pagination buttons (Previous, Page Numbers, Next)
+   ✓ Chỉ hiển thị pagination nếu có >12 kết quả
+   ✓ Loading spinner trong quá trình tìm kiếm
+   ✓ Error messages rõ ràng
+   ✓ Chi tiết đầy đủ khi xem Details
+
+================================================================================
+HẠN CHẾ / LƯU Ý
+================================================================================
+
+⚠️  Directory Selection:
+    - Hiện tại là text input (nhập đường dẫn)
+    - Để sử dụng được cần app server hỗ trợ
+    - Tính năng file picker (GUI) cần thêm backend support
+
+⚠️  Author/Artist Search:
+    - Tìm kiếm theo tên (không phải lọc danh sách)
+    - Kết quả phụ thuộc vào API MangaDex
+
+⚠️  Phân trang:
+    - Tối đa 100 kết quả/trang
+    - Cần có trường "total" từ MangaDex API
+
+================================================================================
+KIỂM TRA / TEST
+================================================================================
+
+✅ Phân trang: Tìm "One Piece" → Thấy 95 kết quả, có thể duyệt qua trang
+✅ ID hiển thị: Mỗi card có "ID: xxxxx..."
+✅ URL: Tab Details → "Manga URL: https://mangadex.org/title/..."
+✅ Tác giả: Tìm "Naruto" + "Masashi Kishimoto" → Hoạt động
+✅ Ngôn ngữ: 39 ngôn ngữ trong dropdown
+✅ Thư mục: Field "Save Directory" có trong form
+✅ API offset: GET ...&limit=5&offset=5 → Kết quả khác
+
+================================================================================
+NEXT STEPS / CẢI THIỆN TỰ LAI
+================================================================================
+
+1. File picker GUI (cần backend Python hỗ trợ)
+2. Export danh sách kết quả (CSV, JSON)
+3. Lưu bookmark truyện yêu thích
+4. Advanced filters (rating, year, tags)
+5. Batch download multiple manga
+6. Download history / progress tracking
+
+================================================================================
+PHẦN MỀM / PHỤ THUỘC
+================================================================================
+
+- FastAPI 0.124+
+- Uvicorn 0.38+
+- Python 3.11+ (uv Astral)
+- mangadex-downloader (core library)
+- Font Awesome 6.4 (icons)
+
+================================================================================

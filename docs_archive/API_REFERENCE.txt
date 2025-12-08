@@ -1,0 +1,402 @@
+================================================================================
+           MANGADEX DOWNLOADER API REFERENCE - v2.0
+================================================================================
+
+BASE URL: http://localhost:8000
+
+================================================================================
+1️⃣  SEARCH ENDPOINTS
+================================================================================
+
+GET /api/search/manga
+────────────────────────────────────────────────────────────────────────────
+
+MỤC ĐÍCH: Tìm kiếm truyện với nhiều bộ lọc
+
+PARAMETERS:
+  - title (string, REQUIRED): Tên truyện cần tìm
+  - authors (string, optional): Tên tác giả
+  - artists (string, optional): Tên họa sĩ
+  - status (string, optional): ongoing, completed, hiatus, cancelled
+  - languages (string, optional): Mã ngôn ngữ (ja, en, zh, ko, ...)
+  - content_rating (string, optional): safe, suggestive, erotica, pornographic
+  - limit (integer, default=12, max=100): Số lượng kết quả
+  - offset (integer, default=0): Vị trí bắt đầu (để phân trang)
+
+EXAMPLE REQUESTS:
+
+  1. Tìm One Piece (3 kết quả):
+     GET /api/search/manga?title=one+piece&limit=3
+
+  2. Tìm Naruto, trang 2 (5 kết quả/trang):
+     GET /api/search/manga?title=naruto&limit=5&offset=5
+
+  3. Tìm truyện tiếng Nhật:
+     GET /api/search/manga?title=demon+slayer&languages=ja&limit=10
+
+  4. Tìm truyện của tác giả:
+     GET /api/search/manga?title=naruto&authors=Masashi+Kishimoto
+
+  5. Tìm truyện hoàn thành:
+     GET /api/search/manga?title=bleach&status=completed&limit=20
+
+RESPONSE EXAMPLE:
+{
+  "results": [
+    {
+      "id": "a1c7c817-4e59-43b7-9365-09675a149a6f",
+      "title": "ONE PIECE",
+      "status": "ongoing",
+      "originalLanguage": "ja",
+      "year": 1997,
+      "cover": "https://uploads.mangadex.org/covers/a1c7c817-4e59-43b7-9365-09675a149a6f/..."
+    },
+    ...
+  ],
+  "total": 95,
+  "limit": 3,
+  "offset": 0
+}
+
+FIELDS GIẢI THÍCH:
+  - id: UUID của truyện (dùng cho Download/Details)
+  - title: Tên tiếng Anh của truyện
+  - status: Trạng thái truyện
+  - originalLanguage: Ngôn ngữ gốc (mã ngôn ngữ)
+  - year: Năm xuất bản
+  - cover: URL của hình cover từ MangaDex CDN
+  - total: Tổng số truyện tìm thấy
+  - limit: Số kết quả mỗi trang
+  - offset: Vị trí bắt đầu
+
+PAGINATION EXAMPLE:
+  Trang 1: limit=10, offset=0
+  Trang 2: limit=10, offset=10
+  Trang 3: limit=10, offset=20
+  Formula: offset = (page - 1) * limit
+
+────────────────────────────────────────────────────────────────────────────
+
+GET /api/search/languages
+────────────────────────────────────────────────────────────────────────────
+
+MỤC ĐÍCH: Lấy danh sách tất cả 39 ngôn ngữ
+
+PARAMETERS: Không có
+
+EXAMPLE REQUEST:
+  GET /api/search/languages
+
+RESPONSE EXAMPLE:
+{
+  "languages": [
+    {"code": "en", "name": "English"},
+    {"code": "ja", "name": "Japanese"},
+    {"code": "zh", "name": "Chinese (Simplified)"},
+    {"code": "zh-hk", "name": "Chinese (Traditional)"},
+    {"code": "ko", "name": "Korean"},
+    ...
+  ]
+}
+
+────────────────────────────────────────────────────────────────────────────
+
+GET /api/search/authors?query={query}
+────────────────────────────────────────────────────────────────────────────
+
+MỤC ĐÍCH: Tìm kiếm tác giả theo tên
+
+PARAMETERS:
+  - query (string, REQUIRED): Tên tác giả cần tìm
+
+EXAMPLE REQUEST:
+  GET /api/search/authors?query=Masashi+Kishimoto
+
+RESPONSE EXAMPLE:
+{
+  "authors": [
+    {
+      "id": "author-uuid",
+      "name": "Masashi Kishimoto"
+    }
+  ]
+}
+
+────────────────────────────────────────────────────────────────────────────
+
+GET /api/search/artists?query={query}
+────────────────────────────────────────────────────────────────────────────
+
+MỤC ĐÍCH: Tìm kiếm họa sĩ theo tên
+
+PARAMETERS:
+  - query (string, REQUIRED): Tên họa sĩ cần tìm
+
+EXAMPLE REQUEST:
+  GET /api/search/artists?query=Eiichiro+Oda
+
+RESPONSE EXAMPLE:
+{
+  "artists": [
+    {
+      "id": "artist-uuid",
+      "name": "Eiichiro Oda"
+    }
+  ]
+}
+
+================================================================================
+2️⃣  MANGA DETAIL ENDPOINTS
+================================================================================
+
+GET /api/manga/{id}
+────────────────────────────────────────────────────────────────────────────
+
+MỤC ĐÍCH: Lấy chi tiết đầy đủ của một truyện
+
+PARAMETERS:
+  - id (path, REQUIRED): UUID của truyện
+
+EXAMPLE REQUEST:
+  GET /api/manga/a1c7c817-4e59-43b7-9365-09675a149a6f
+
+RESPONSE EXAMPLE:
+{
+  "id": "a1c7c817-4e59-43b7-9365-09675a149a6f",
+  "title": "ONE PIECE",
+  "status": "ongoing",
+  "originalLanguage": "ja",
+  "year": 1997,
+  "description": "...",
+  "content_rating": "suggestive",
+  "cover": "https://uploads.mangadex.org/covers/...",
+  "authors": [
+    {"id": "author-id", "name": "Eiichiro Oda"}
+  ],
+  "artists": [
+    {"id": "artist-id", "name": "Eiichiro Oda"}
+  ]
+}
+
+────────────────────────────────────────────────────────────────────────────
+
+GET /api/manga/{id}/chapters?limit=50
+────────────────────────────────────────────────────────────────────────────
+
+MỤC ĐÍCH: Lấy danh sách chapters của truyện
+
+PARAMETERS:
+  - id (path, REQUIRED): UUID của truyện
+  - limit (query, default=50): Số chapters tối đa
+
+EXAMPLE REQUEST:
+  GET /api/manga/a1c7c817-4e59-43b7-9365-09675a149a6f/chapters?limit=15
+
+RESPONSE EXAMPLE:
+{
+  "chapters": [
+    {
+      "id": "chapter-id",
+      "chapter": "1050",
+      "title": "Chapter Title",
+      "pages": 20,
+      "upload_date": "2024-12-01T10:00:00"
+    },
+    ...
+  ]
+}
+
+================================================================================
+3️⃣  DOWNLOAD ENDPOINTS
+================================================================================
+
+POST /api/url/download
+────────────────────────────────────────────────────────────────────────────
+
+MỤC ĐÍCH: Tạo tác vụ tải truyện
+
+CONTENT-TYPE: application/json
+
+REQUEST BODY:
+{
+  "url": "https://mangadex.org/title/... hoặc uuid",
+  "save_as": "pdf" | "epub" | "cbz" | "raw" | null,
+  "language": "en" | "ja" | "zh" | null,
+  "start_chapter": "1" | null,
+  "end_chapter": "100" | null,
+  "groups": "Group Name" | null,
+  "path": "/path/to/save" | null,
+  "no_track": false
+}
+
+EXAMPLE REQUEST:
+  POST /api/url/download
+  
+  {
+    "url": "a1c7c817-4e59-43b7-9365-09675a149a6f",
+    "save_as": "pdf",
+    "language": null,
+    "start_chapter": "1",
+    "end_chapter": "100",
+    "groups": null,
+    "path": "C:\\Manga\\One Piece",
+    "no_track": false
+  }
+
+RESPONSE EXAMPLE:
+{
+  "job_id": "job-uuid-xxxx",
+  "status": "created",
+  "message": "Download job created"
+}
+
+────────────────────────────────────────────────────────────────────────────
+
+GET /api/url/jobs/{job_id}
+────────────────────────────────────────────────────────────────────────────
+
+MỤC ĐÍCH: Lấy trạng thái tác vụ tải
+
+PARAMETERS:
+  - job_id (path, REQUIRED): ID của tác vụ (từ /download response)
+
+EXAMPLE REQUEST:
+  GET /api/url/jobs/job-uuid-xxxx
+
+RESPONSE EXAMPLE:
+{
+  "job_id": "job-uuid-xxxx",
+  "status": "downloading",
+  "message": "Downloaded 50 chapters...",
+  "progress": 50
+}
+
+STATUS VALUES:
+  - created: Tác vụ vừa tạo
+  - downloading: Đang tải
+  - processing: Đang xử lý
+  - done: Hoàn thành
+  - error: Lỗi
+
+================================================================================
+4️⃣  LANGUAGE CODES (39 NGÔN NGỮ)
+================================================================================
+
+en              English
+ja              Japanese
+zh              Chinese (Simplified)
+zh-hk           Chinese (Traditional)
+ko              Korean
+es              Spanish
+fr              French
+de              German
+it              Italian
+pt              Portuguese
+pt-br           Portuguese (Brazilian)
+ru              Russian
+ar              Arabic
+hi              Hindi
+th              Thai
+vi              Vietnamese
+pl              Polish
+uk              Ukrainian
+id              Indonesian
+tr              Turkish
+bn              Bengali
+bg              Bulgarian
+ca              Catalan
+cs              Czech
+cy              Welsh
+da              Danish
+nl              Dutch
+et              Estonian
+fa              Farsi
+fi              Finnish
+el              Greek
+he              Hebrew
+hu              Hungarian
+ja-ro           Japanese (Romanized)
+jv              Javanese
+kk              Kazakh
+km              Khmer
+lo              Lao
+lt              Lithuanian
+mk              Macedonian
+mn              Mongolian
+ms              Malay
+my              Burmese
+nb              Norwegian (Bokmål)
+ne              Nepali
+no              Norwegian
+or              Odia
+pa              Punjabi
+ro              Romanian
+sk              Slovak
+sl              Slovenian
+so              Somali
+sr              Serbian
+sv              Swedish
+ta              Tamil
+te              Telugu
+tl              Filipino
+ur              Urdu
+uz              Uzbek
+zh-ro           Chinese (Romanized)
+
+================================================================================
+5️⃣  CURL EXAMPLES
+================================================================================
+
+Tìm One Piece:
+  curl "http://localhost:8000/api/search/manga?title=one+piece&limit=5"
+
+Tìm theo tác giả:
+  curl "http://localhost:8000/api/search/manga?title=naruto&authors=Masashi"
+
+Lấy chi tiết:
+  curl "http://localhost:8000/api/manga/a1c7c817-4e59-43b7-9365-09675a149a6f"
+
+Lấy chapters:
+  curl "http://localhost:8000/api/manga/a1c7c817-4e59-43b7-9365-09675a149a6f/chapters?limit=20"
+
+Tải truyện:
+  curl -X POST http://localhost:8000/api/url/download \
+    -H "Content-Type: application/json" \
+    -d '{
+      "url": "a1c7c817-4e59-43b7-9365-09675a149a6f",
+      "save_as": "pdf",
+      "start_chapter": "1",
+      "end_chapter": "100"
+    }'
+
+Kiểm tra trạng thái:
+  curl "http://localhost:8000/api/url/jobs/{job_id}"
+
+Lấy ngôn ngữ:
+  curl "http://localhost:8000/api/search/languages"
+
+================================================================================
+6️⃣  RESPONSE CODES
+================================================================================
+
+200 OK
+  - Yêu cầu thành công
+
+400 Bad Request
+  - Thiếu tham số hoặc không hợp lệ
+
+404 Not Found
+  - Truyện hoặc tác vụ không tìm thấy
+
+500 Internal Server Error
+  - Lỗi server
+
+================================================================================
+7️⃣  RATE LIMITING
+================================================================================
+
+- MangaDex API: Giới hạn request (kiểm tra docs MangaDex)
+- Webapp không có giới hạn riêng
+- Khuyến cáo: Không spam request liên tục
+
+================================================================================

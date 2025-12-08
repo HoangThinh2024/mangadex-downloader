@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MangaDex Downloader - Web Interface</title>
+    <link rel="stylesheet" href="/static/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <main>
+        <h1>MangaDex Downloader Web</h1>
+        
+        <!-- Navigation -->
+        <nav class="navbar">
+            <button class="nav-btn active" data-tab="search">Search</button>
+            <button class="nav-btn" data-tab="download">Download</button>
+            <button class="nav-btn" data-tab="details">Details</button>
+        </nav>
+
+        <!-- Search Tab -->
+        <section id="search-tab" class="tab-content active">
+            <h2>🔍 Search Manga</h2>
+            
+            <div class="search-section">
+                <h3>Basic Search</h3>
+                <form id="search-form">
+                    <div class="form-group">
+                        <input type="text" id="search-title" placeholder="Enter title..." />
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <input type="text" id="search-author" placeholder="Author" />
+                        </div>
+                        <div class="form-group">
+                            <input type="text" id="search-artist" placeholder="Artist" />
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <select id="search-status">
+                                <option value="">Status</option>
+                                <option value="ongoing">Ongoing</option>
+                                <option value="completed">Completed</option>
+                                <option value="hiatus">Hiatus</option>
+                                <option value="cancelled">Cancelled</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <select id="search-language">
+                                <option value="">Language</option>
+                                <option value="en">English</option>
+                                <option value="ja">Japanese</option>
+                                <option value="zh">Chinese</option>
+                                <option value="ko">Korean</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <select id="search-rating">
+                                <option value="">Content Rating</option>
+                                <option value="safe">Safe</option>
+                                <option value="suggestive">Suggestive</option>
+                                <option value="erotica">Erotica</option>
+                                <option value="pornographic">Pornographic</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <input type="number" id="search-limit" placeholder="Limit (max 100)" min="1" max="100" value="10" />
+                        </div>
+                    </div>
+                    <button type="submit" class="btn-primary">Search</button>
+                </form>
+            </div>
+
+            <!-- Search Results -->
+            <div id="search-results-container" class="hidden">
+                <h3>Search Results</h3>
+                <div id="search-results" class="manga-grid"></div>
+                <div id="search-pagination" class="pagination"></div>
+            </div>
+        </section>
+
+        <!-- Download Tab -->
+        <section id="download-tab" class="tab-content">
+            <h2>⬇️ Download</h2>
+            
+            <form id="download-form" class="download-form">
+                <div class="form-group">
+                    <label for="download-url">Manga/Chapter URL:</label>
+                    <input type="url" id="download-url" placeholder="https://mangadex.org/title/..." required />
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="download-format">Format:</label>
+                        <select id="download-format">
+                            <option value="">Auto</option>
+                            <option value="pdf">PDF</option>
+                            <option value="epub">EPUB</option>
+                            <option value="cbz">CBZ</option>
+                            <option value="raw">Raw (JPG/PNG)</option>
+                            <option value="7z">7ZIP</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="download-language">Language:</label>
+                        <select id="download-language">
+                            <option value="">Default</option>
+                            <option value="en">English</option>
+                            <option value="ja">Japanese</option>
+                            <option value="zh">Chinese</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="download-start">Start Chapter:</label>
+                        <input type="text" id="download-start" placeholder="1" />
+                    </div>
+                    <div class="form-group">
+                        <label for="download-end">End Chapter:</label>
+                        <input type="text" id="download-end" placeholder="latest" />
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="download-group">Scanlation Group:</label>
+                        <input type="text" id="download-group" placeholder="(optional)" />
+                    </div>
+                    <div class="form-group">
+                        <label for="download-path">Save Path:</label>
+                        <input type="text" id="download-path" placeholder="./downloads (default)" />
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="download-no-track" />
+                        Don't track download
+                    </label>
+                </div>
+
+                <button type="submit" class="btn-primary">Start Download</button>
+            </form>
+
+            <!-- Download Status -->
+            <div id="download-status-container" class="hidden">
+                <h3>Download Status</h3>
+                <div id="download-status" class="status-box"></div>
+            </div>
+        </section>
+
+        <!-- Details Tab -->
+        <section id="details-tab" class="tab-content">
+            <h2>📖 Manga Details</h2>
+            
+            <div class="form-group">
+                <input type="text" id="details-manga-id" placeholder="Enter Manga ID or URL..." />
+                <button type="button" id="details-fetch-btn" class="btn-secondary">Load Details</button>
+            </div>
+
+            <div id="manga-details-container" class="hidden">
+                <div class="manga-detail">
+                    <div class="detail-cover">
+                        <img id="detail-cover-img" src="" alt="Cover" />
+                    </div>
+                    <div class="detail-info">
+                        <h2 id="detail-title"></h2>
+                        <p id="detail-description"></p>
+                        
+                        <div class="detail-stats">
+                            <div class="stat">
+                                <strong>Status:</strong>
+                                <span id="detail-status"></span>
+                            </div>
+                            <div class="stat">
+                                <strong>Year:</strong>
+                                <span id="detail-year"></span>
+                            </div>
+                            <div class="stat">
+                                <strong>Content Rating:</strong>
+                                <span id="detail-rating"></span>
+                            </div>
+                        </div>
+
+                        <div class="detail-section">
+                            <h3>Authors</h3>
+                            <ul id="detail-authors"></ul>
+                        </div>
+
+                        <div class="detail-section">
+                            <h3>Artists</h3>
+                            <ul id="detail-artists"></ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="chapters-section">
+                    <h3>Latest Chapters</h3>
+                    <div id="chapters-list"></div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // Tab Navigation
+        document.querySelectorAll('.nav-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(tab => tab.classList.add('hidden'));
+                
+                btn.classList.add('active');
+                const tabName = btn.dataset.tab + '-tab';
+                document.getElementById(tabName).classList.remove('hidden');
+            });
+        });
+
+        // Search Manga
+        document.getElementById('search-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const title = document.getElementById('search-title').value;
+            const author = document.getElementById('search-author').value;
+            const artist = document.getElementById('search-artist').value;
+            const status = document.getElementById('search-status').value;
+            const language = document.getElementById('search-language').value;
+            const rating = document.getElementById('search-rating').value;
+            const limit = document.getElementById('search-limit').value;
+
+            const params = new URLSearchParams({
+                limit: limit || 10,
+            });
+            
+            if (title) params.append('title', title);
+            if (author) params.append('authors', author);
+            if (artist) params.append('artists', artist);
+            if (status) params.append('status', status);
+            if (language) params.append('languages', language);
+            if (rating) params.append('content_rating', rating);
+
+            try {
+                const res = await fetch(`/api/search/manga?${params}`);
+                const data = await res.json();
+
+                const resultsContainer = document.getElementById('search-results-container');
+                const resultsDiv = document.getElementById('search-results');
+                
+                resultsDiv.innerHTML = '';
+                
+                if (data.data && data.data.length > 0) {
+                    data.data.forEach(manga => {
+                        const card = document.createElement('div');
+                        card.className = 'manga-card';
+                        card.innerHTML = `
+                            <img src="${manga.cover || '/static/placeholder.png'}" alt="${manga.title}" />
+                            <h3>${manga.title}</h3>
+                            <p>${manga.status || 'Unknown'}</p>
+                            <button class="btn-sm" onclick="setDownloadUrl('https://mangadex.org/title/${manga.id}')">
+                                Download
+                            </button>
+                        `;
+                        resultsDiv.appendChild(card);
+                    });
+                    resultsContainer.classList.remove('hidden');
+                } else {
+                    resultsDiv.innerHTML = '<p>No results found</p>';
+                    resultsContainer.classList.remove('hidden');
+                }
+            } catch (err) {
+                console.error('Search error:', err);
+                alert('Search failed: ' + err.message);
+            }
+        });
+
+        // Download
+        document.getElementById('download-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const url = document.getElementById('download-url').value;
+            const format = document.getElementById('download-format').value;
+            const language = document.getElementById('download-language').value;
+            const startChapter = document.getElementById('download-start').value;
+            const endChapter = document.getElementById('download-end').value;
+            const group = document.getElementById('download-group').value;
+            const path = document.getElementById('download-path').value;
+            const noTrack = document.getElementById('download-no-track').checked;
+
+            const payload = {
+                url: url,
+                save_as: format || null,
+                language: language || null,
+                start_chapter: startChapter || null,
+                end_chapter: endChapter || null,
+                groups: group || null,
+                path: path || null,
+                no_track: noTrack,
+            };
+
+            try {
+                const res = await fetch('/api/url/download', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload),
+                });
+
+                const data = await res.json();
+                const jobId = data.job_id;
+
+                document.getElementById('download-status-container').classList.remove('hidden');
+                
+                // Poll status
+                const statusDiv = document.getElementById('download-status');
+                const pollStatus = async () => {
+                    const statusRes = await fetch(`/api/url/jobs/${jobId}`);
+                    const statusData = await statusRes.json();
+
+                    statusDiv.innerHTML = `
+                        <div class="status-item">
+                            <strong>Status:</strong> ${statusData.status}
+                        </div>
+                        <div class="status-item">
+                            <strong>Message:</strong> ${statusData.message || 'Processing...'}
+                        </div>
+                    `;
+
+                    if (statusData.status !== 'done' && statusData.status !== 'error') {
+                        setTimeout(pollStatus, 1500);
+                    }
+                };
+
+                pollStatus();
+            } catch (err) {
+                console.error('Download error:', err);
+                alert('Download failed: ' + err.message);
+            }
+        });
+
+        // Get Manga Details
+        document.getElementById('details-fetch-btn').addEventListener('click', async () => {
+            const input = document.getElementById('details-manga-id').value;
+            
+            // Extract manga ID from URL if needed
+            let mangaId = input;
+            if (input.includes('mangadex.org')) {
+                const match = input.match(/\/title\/([a-f0-9-]+)/);
+                mangaId = match ? match[1] : input;
+            }
+
+            try {
+                const res = await fetch(`/api/manga/${mangaId}`);
+                const data = await res.json();
+
+                if (data.error) {
+                    alert('Manga not found');
+                    return;
+                }
+
+                document.getElementById('detail-title').textContent = data.title;
+                document.getElementById('detail-description').textContent = data.description || 'No description';
+                document.getElementById('detail-status').textContent = data.status || 'Unknown';
+                document.getElementById('detail-year').textContent = data.year || 'Unknown';
+                document.getElementById('detail-rating').textContent = data.content_rating || 'Unknown';
+                
+                if (data.cover) {
+                    document.getElementById('detail-cover-img').src = data.cover;
+                }
+
+                const authorsList = document.getElementById('detail-authors');
+                authorsList.innerHTML = '';
+                if (data.authors && data.authors.length > 0) {
+                    data.authors.forEach(author => {
+                        const li = document.createElement('li');
+                        li.textContent = author.name;
+                        authorsList.appendChild(li);
+                    });
+                }
+
+                const artistsList = document.getElementById('detail-artists');
+                artistsList.innerHTML = '';
+                if (data.artists && data.artists.length > 0) {
+                    data.artists.forEach(artist => {
+                        const li = document.createElement('li');
+                        li.textContent = artist.name;
+                        artistsList.appendChild(li);
+                    });
+                }
+
+                // Load chapters
+                const chaptersRes = await fetch(`/api/manga/${mangaId}/chapters?limit=10`);
+                const chaptersData = await chaptersRes.json();
+                
+                const chaptersList = document.getElementById('chapters-list');
+                chaptersList.innerHTML = '';
+                if (chaptersData.chapters && chaptersData.chapters.length > 0) {
+                    chaptersData.chapters.forEach(ch => {
+                        const div = document.createElement('div');
+                        div.className = 'chapter-item';
+                        div.innerHTML = `
+                            <div>
+                                <strong>Vol. ${ch.volume || '?'} Ch. ${ch.chapter || '?'}</strong>
+                                <p>${ch.title || 'No title'}</p>
+                            </div>
+                            <small>${ch.pages || '?'} pages • ${ch.language}</small>
+                        `;
+                        chaptersList.appendChild(div);
+                    });
+                }
+
+                document.getElementById('manga-details-container').classList.remove('hidden');
+            } catch (err) {
+                console.error('Details error:', err);
+                alert('Failed to load details: ' + err.message);
+            }
+        });
+
+        // Helper function to set download URL
+        function setDownloadUrl(url) {
+            document.getElementById('download-url').value = url;
+            // Switch to download tab
+            document.querySelector('[data-tab="download"]').click();
+        }
+    </script>
+</body>
+</html>
+

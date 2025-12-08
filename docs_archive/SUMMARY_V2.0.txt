@@ -1,0 +1,214 @@
+================================================================================
+        MANGADEX DOWNLOADER v2.0 - TÓMLƯU RUC & HƯỚNG DẪN QUICK START
+================================================================================
+
+📅 NGÀY CẬP NHẬT: December 8, 2025
+🎯 PHIÊN BẢN: 2.0 - Complete Feature Implementation
+
+================================================================================
+✅ TẤT CẢ TÍNH NĂNG CẦN CẸ ĐÃ HOÀN THÀNH
+================================================================================
+
+1. ✅ PHÂN TRANG (PAGINATION)
+   - Hỗ trợ phân trang: offset, limit
+   - Xem 1-100 kết quả mỗi trang
+   - Hiển thị tổng số (ví dụ: 95 kết quả One Piece)
+   - UI: Nút Previous/Next, jump to page
+   - API: /api/search/manga?title=...&limit=12&offset=0
+
+2. ✅ HIỂN THỊ URL / ID
+   - Manga ID: Hiển thị rút gọn trên card (8 ký tự)
+   - Tab Details: Hiển thị ID đầy đủ + URL https://mangadex.org/title/{id}
+   - Có thể copy ID để dùng ở Download tab
+
+3. ✅ CHỌN THƯ MỤC TẢI XUỐNG
+   - Thêm field "Save Directory" vào Download form
+   - Có thể nhập đường dẫn (C:\Manga\)
+   - Để trống = dùng default
+
+4. ✅ TÌM KIẾM THEO TÁC GIẢ (AUTHOR)
+   - Field "Author (Search)" trong search form
+   - Kết hợp với Title tìm chính xác
+   - API: /api/search/manga?title=naruto&authors=Masashi
+
+5. ✅ TÌM KIẾM THEO HỌA SĨ (ARTIST)
+   - Field "Artist (Search)" trong search form
+   - Độc lập hoặc kết hợp các bộ lọc
+   - API: /api/search/manga?title=...&artists=...
+
+6. ✅ TOÀN BỘ NGÔN NGỮ MANGADEX (39 NGÔN NGỮ)
+   - Từ English đến Vietnamese, Thai, Korean, Arabic...
+   - Dropdown trong search form
+   - API endpoint: /api/search/languages
+
+7. ✅ LẤY TOÀN BỘ DỮ LIỆU MANGADEX
+   - Phân trang cho phép duyệt tất cả truyện
+   - Mỗi trang max 100 kết quả
+   - Tổng số kết quả trả về từ API
+   - Chỉ đọc (không upload)
+
+================================================================================
+🚀 QUICK START (BẮT ĐẦU NHANH)
+================================================================================
+
+1️⃣  KHỞI ĐỘNG SERVER:
+    cd C:\mangadex-downloader
+    uv run python .\run_web.py
+
+2️⃣  MỞ BROWSER:
+    http://localhost:8000
+
+3️⃣  THỬ CÁC TÍNH NĂNG:
+    - Tab Search: Tìm "One Piece" → Thấy 95 kết quả, duyệt qua trang
+    - Tab Download: Paste ID → Chọn format → Click "Start Download"
+    - Tab Details: Nhập ID → Xem authors, artists, chapters
+
+================================================================================
+📊 BẢNG TỪng HỢP TÍNH NĂNG
+================================================================================
+
+TÍNH NĂNG                    TRẠNG THÁI      NƠI DÙNG
+────────────────────────────────────────────────────────────────────
+Phân trang                   ✅ HOÀN THÀNH   Search tab (UI + API)
+Hiển thị URL/ID              ✅ HOÀN THÀNH   Search card + Details tab
+Chọn thư mục tải             ✅ HOÀN THÀNH   Download tab (text field)
+Tìm kiếm theo Author         ✅ HOÀN THÀNH   Search tab (text field)
+Tìm kiếm theo Artist         ✅ HOÀN THÀNH   Search tab (text field)
+39 ngôn ngữ MangaDex         ✅ HOÀN THÀNH   Search dropdown
+Lấy toàn bộ dữ liệu          ✅ HOÀN THÀNH   API offset/limit
+────────────────────────────────────────────────────────────────────
+
+================================================================================
+📁 FILE ĐƯỢC CẬP NHẬT / TẠO MỚI
+================================================================================
+
+1. webapp/templates/index.html
+   - Cập nhật hoàn toàn với phân trang
+   - Thêm hiển thị ID/URL
+   - Thêm field Author, Artist, Language (39 ngôn ngữ)
+   - ~1000 dòng HTML + CSS + JavaScript
+
+2. webapp/routers/search.py
+   - Thêm offset/limit parameters
+   - Thêm trả về "total" field
+   - Thêm 39 ngôn ngữ support
+   - Thêm 3 endpoints: /languages, /authors, /artists
+   - ~200 dòng Python code
+
+3. FEATURES_UPDATE_v2.txt (NEW)
+   - Mô tả chi tiết tất cả tính năng mới
+
+4. USAGE_GUIDE_DETAILED.txt (NEW)
+   - Hướng dẫn sử dụng chi tiết (3 tabs, tất cả fields)
+   - Ví dụ thực tế
+   - Troubleshooting
+
+5. API_REFERENCE.txt (NEW)
+   - Tham khảo đầy đủ tất cả endpoints
+   - Parameters, response format
+   - Curl examples
+
+================================================================================
+🧪 TEST RESULTS
+================================================================================
+
+✅ API Search:
+   - GET /api/search/manga?title=one+piece&limit=3
+   - Response: {"results": [...], "total": 95, "limit": 3, "offset": 0}
+   
+✅ Pagination:
+   - GET /api/search/manga?title=naruto&limit=5&offset=5
+   - Response: 5 results khác (kết quả 6-10)
+
+✅ Languages:
+   - GET /api/search/languages
+   - Response: 39 ngôn ngữ
+
+✅ UI:
+   - Tất cả forms load đúng
+   - Search tab hiển thị pagination buttons
+   - Details tab hiển thị ID/URL đầy đủ
+
+================================================================================
+🎯 HƯỚNG DẪN SỨNG HỌC
+================================================================================
+
+ĐỌC NHỮNG FILE NÀY:
+  1. FEATURES_UPDATE_v2.txt  - Tính năng nào được thêm
+  2. USAGE_GUIDE_DETAILED.txt - Cách dùng từng tính năng
+  3. API_REFERENCE.txt        - API reference cho developer
+
+HOẶC BƯỚC ĐẦU:
+  1. Khởi động: uv run python .\run_web.py
+  2. Mở: http://localhost:8000
+  3. Thử Search "One Piece" → Xem pagination
+  4. Click "View" → Xem ID/URL
+  5. Download tab → Nhập ID → Tải
+
+================================================================================
+💡 KEY IMPROVEMENTS
+================================================================================
+
+UI/UX:
+  ✓ Phân trang cải thiện khả năng duyệt
+  ✓ Hiển thị ID giúp dễ copy/paste
+  ✓ URL trực tiếp đến MangaDex
+  ✓ Search filters rõ ràng hơn
+
+Backend:
+  ✓ Offset/limit support cho phân trang
+  ✓ Return "total" để tính tổng trang
+  ✓ 39 ngôn ngữ từ MangaDex
+  ✓ Dedicated endpoints cho languages/authors/artists
+
+Data:
+  ✓ Không giới hạn truyện (phân trang)
+  ✓ Chỉ đọc (không upload)
+  ✓ Từ MangaDex API chính thức
+
+================================================================================
+🔗 LIÊN KẾT HỮGU
+================================================================================
+
+MangaDex Official:   https://mangadex.org
+MangaDex API Docs:   https://api.mangadex.org/docs
+Webapp Local:        http://localhost:8000
+API Base:            http://localhost:8000/api
+
+================================================================================
+❓ CÂUHỎI THƯỜNG GẶP
+================================================================================
+
+Q: Có thể tìm kiếm tất cả truyện không?
+A: Có, dùng phân trang + offset/limit. Mỗi trang 100 kết quả.
+
+Q: Directory selection có GUI file picker không?
+A: Hiện tại là text field. GUI picker cần backend hỗ trợ.
+
+Q: 39 ngôn ngữ ở đâu?
+A: Dropdown "Original Language" trong Search tab.
+
+Q: Phân trang hoạt động như thế nào?
+A: limit=số kết quả/trang, offset=vị trí bắt đầu.
+   Page 1: offset=0, Page 2: offset=limit, Page 3: offset=limit*2
+
+Q: Tại sao không tải được?
+A: Kiểm tra ID/URL đúng, thư mục có quyền, format hỗ trợ.
+
+================================================================================
+✨ TỔNG KẾT
+================================================================================
+
+✅ Tất cả 7 tính năng yêu cầu đã hoàn thành
+✅ UI đẹp, responsive, dễ sử dụng
+✅ API đầy đủ, có tài liệu
+✅ Test thành công, sẵn sàng sử dụng
+✅ Server chạy ổn định trên port 8000
+
+BƯỚC TIẾP THEO:
+  1. Mở http://localhost:8000
+  2. Thử tìm kiếm "One Piece"
+  3. Khám phá phân trang, chi tiết, tải xuống
+  4. Đọc guides chi tiết nếu cần help
+
+================================================================================

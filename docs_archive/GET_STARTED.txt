@@ -1,0 +1,70 @@
+================================================================================
+                    🚀 BẮT ĐẦU NGAY (3 BƯỚC)
+================================================================================
+
+BƯỚC 1: KHỞI ĐỘNG SERVER
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Mở PowerShell, chạy:
+
+  cd C:\mangadex-downloader
+  uv run python .\run_web.py
+
+Khi thấy:
+  "Uvicorn running on http://0.0.0.0:8000"
+  
+→ Server đã khởi động! ✅
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+BƯỚC 2: MỞ BROWSER
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Mở Chrome, Firefox, hoặc trình duyệt bất kỳ:
+
+  http://localhost:8000
+
+→ Bạn sẽ thấy giao diện MangaDex Downloader! ✨
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+BƯỚC 3: THỬ TÍNH NĂNG
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✅ TEST: Phân Trang
+  1. Nhập: "One Piece"
+  2. Click: "Search Manga"
+  3. Xem: Kết quả + Pagination buttons (Previous [1] [2] [3]... Next)
+  4. Click: Page 2 → Xem kết quả khác
+
+✅ TEST: Hiển Thị ID/URL
+  1. Click: "View" button trên card
+  2. Tab "Details" tự mở
+  3. Xem: "Manga ID: xxxxx..." (đầy đủ)
+  4. Xem: "Manga URL: https://mangadex.org/title/..."
+
+✅ TEST: Tìm Kiếm Author
+  1. Nhập Title: "Naruto"
+  2. Nhập Author: "Masashi Kishimoto"
+  3. Click: "Search Manga"
+  4. Xem: Chỉ truyện của tác giả này
+
+✅ TEST: Chọn Thư Mục
+  1. Tab: "Download"
+  2. Paste: ID từ search results
+  3. Nhập: C:\Manga\One Piece
+  4. Click: "Start Download"
+  5. Xem: Status "downloading" → "done"
+
+================================================================================
+                         ✨ XON! BẠN ĐÃ SẲN SÀNG! ✨
+================================================================================
+
+Để biết thêm chi tiết, đọc:
+  → README_V2.0.txt (Quick Start)
+  → USAGE_GUIDE_DETAILED.txt (Chi Tiết)
+
+Để tham khảo API, đọc:
+  → API_REFERENCE.txt (Developer)
+
+================================================================================
